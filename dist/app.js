@@ -1,5 +1,6 @@
 import {scenes,fragments,observations,chooseScene,readState,signalStrength,isTuned} from './core.js';
 import {Atmosphere} from './audio.js';
+import {decryptBundle,validateRoom,doorReady,doorPrerequisites} from './vault.js';
 
 const $=(s,root=document)=>root.querySelector(s);
 const $$=(s,root=document)=>[...root.querySelectorAll(s)];
@@ -7,15 +8,19 @@ const storageKey='liminal-hacker:v1';
 let raw=null;try{raw=localStorage.getItem(storageKey);}catch{}
 const state=readState(raw),audio=new Atmosphere();
 let current=chooseScene({...state,requested:new URLSearchParams(location.search).get('space')}),immersed=false,toastTimer,panelKind='',lastFocus;
-let storageAvailable=true;
+let storageAvailable=true,hiddenScene=null,hiddenLetter=null,hiddenImageURL=null,unlockAttempt=0;
+const totalFragments=Object.keys(fragments).length;
+const escapeHTML=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const allScenes=()=>hiddenScene?[...scenes,hiddenScene]:scenes;
+const two=value=>String(value).padStart(2,'0');
 const panel=$('#panel'),content=$('#panel-content');
 function save(){try{localStorage.setItem(storageKey,JSON.stringify(state));storageAvailable=true;return true;}catch{storageAvailable=false;return false;}}
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),4000);}
-function scene(){return scenes.find(s=>s.id===current);}
+function scene(){return allScenes().find(s=>s.id===current);}
 function count(){const label=`${state.found.length} / ${Object.keys(fragments).length}`;$('#fragment-count').textContent=label;$('#explore-count').textContent=label;}
-function updateLock(){$('#lock-scene').setAttribute('aria-pressed',String(state.locked===current));$('#lock-scene').textContent=state.locked===current?'◆ Staying here':'◇ Stay here';}
+function updateLock(){$('#lock-scene').disabled=current==='unlisted';$('#lock-scene').setAttribute('aria-pressed',String(state.locked===current));$('#lock-scene').textContent=current==='unlisted'?'◇ This visit only':state.locked===current?'◆ Staying here':'◇ Stay here';}
 function renderSpaces(){
- $('#space-list').innerHTML=scenes.map((s,i)=>`<button class="space-card ${s.id===current?'selected':''}" data-scene-id="${s.id}" aria-pressed="${s.id===current}"><div class="space-photo"><img src="assets/${s.id}.webp" alt="${s.name}: ${s.subtitle}" width="1672" height="941" loading="lazy"><span class="space-tag">0${i+1} / ${s.time}</span>${s.id===current?'<span class="space-selected">YOU ARE HERE</span>':''}</div><div class="space-detail"><div><h3>${s.name}</h3><p>${s.level} · ${s.subtitle}</p></div><span aria-hidden="true">↗</span></div></button>`).join('');
+ $('#space-list').innerHTML=allScenes().map((s,i)=>`<button class="space-card ${s.id===current?'selected':''}" data-scene-id="${s.id}" aria-pressed="${s.id===current}"><div class="space-photo"><img src="${escapeHTML(s.image)}" alt="${escapeHTML(s.name+': '+s.subtitle)}" width="1672" height="941" loading="lazy"><span class="space-tag">${s.id==='unlisted'?'??':two(i+1)} / ${escapeHTML(s.time)}</span>${s.id===current?'<span class="space-selected">YOU ARE HERE</span>':''}</div><div class="space-detail"><div><h3>${escapeHTML(s.name)}</h3><p>${escapeHTML(s.level)} · ${escapeHTML(s.subtitle)}</p></div><span aria-hidden="true">↗</span></div></button>`).join('');
  $$('[data-scene-id]').forEach(b=>b.addEventListener('click',()=>{setScene(b.dataset.sceneId);window.scrollTo({top:0,behavior:'smooth'});}));
 }
 function renderHotspots(){
@@ -23,30 +28,32 @@ function renderHotspots(){
  $$('[data-hotspot]').forEach(b=>b.addEventListener('click',()=>{const h=scene().hotspots[Number(b.dataset.hotspot)];h.type==='fragment'?openFragment(h.fragment):openPanel(h.type);}));
 }
 function setScene(id){
- if(!scenes.some(s=>s.id===id))return;
- current=id;state.last=id;save();const s=scene();document.documentElement.dataset.scene=id;
- $('#scene-image').style.backgroundImage=`url("assets/${id}.webp")`;
- $('#transmission').textContent=`00${scenes.indexOf(s)+1}`;$('#hero-title').innerHTML=s.title;$('#hero-description').innerHTML=s.description;
- $('#caption-name').textContent=s.name;$('#caption-description').textContent=`${s.level.replace('LEVEL','Level')} · ${s.subtitle}`;$('#caption-status').textContent=s.status;
- $('#explore-index').textContent=`SPACE 0${scenes.indexOf(s)+1} / 03`;$('#explore-name').textContent=s.name;$('#explore-hint').textContent=s.hint;
- audio.setScene(id);renderSpaces();renderHotspots();updateLock();
+ if(!allScenes().some(s=>s.id===id))return;
+ current=id;if(id!=='unlisted'){state.last=id;save();}const s=scene();document.documentElement.dataset.scene=id;
+ document.documentElement.style.setProperty('--accent',s.accent);document.documentElement.style.setProperty('--line',s.accent+'33');
+ $('#scene-image').style.backgroundImage=`url("${s.image}")`;
+ $('#transmission').textContent=id==='unlisted'?'???':String(scenes.indexOf(s)+1).padStart(3,'0');
+ $('#hero-title').innerHTML=`${escapeHTML(s.heading[0])}<br><em>${escapeHTML(s.heading[1])}</em>`;$('#hero-description').textContent=s.description;
+ $('#caption-name').textContent=s.name;$('#caption-description').textContent=`${s.level.toLowerCase().replace(/^./,c=>c.toUpperCase())} · ${s.subtitle}`;$('#caption-status').textContent=s.status;
+ $('#explore-index').textContent=id==='unlisted'?'AN UNLISTED PLACE':`SPACE ${two(scenes.indexOf(s)+1)} / ${two(scenes.length)}`;$('#explore-name').textContent=s.name;$('#explore-hint').textContent=s.hint;
+ audio.setScene(s.sound);renderSpaces();renderHotspots();updateLock();
 }
 function enterSpace(){immersed=true;document.body.classList.add('immersed');$('#explore').hidden=false;$('main').inert=true;$('.site-header').inert=true;$('.site-footer').inert=true;$('#leave-space').focus();}
 function leaveSpace(){immersed=false;document.body.classList.remove('immersed');$('#explore').hidden=true;$('main').inert=false;$('.site-header').inert=false;$('.site-footer').inert=false;$('#enter-space').focus();}
-function stepSpace(n){setScene(scenes[(scenes.findIndex(s=>s.id===current)+n+scenes.length)%scenes.length].id);}
-function collect(id){if(!fragments[id]||state.found.includes(id))return false;state.found.push(id);const stored=save();count();renderHotspots();toast(stored?`Fragment saved · ${state.found.length} of 7`:'Fragment found · storage unavailable; export your notebook to keep it');return true;}
-function showPanel(label,kind){lastFocus=document.activeElement;$('#panel-label').textContent=label;panelKind=kind;content.replaceChildren();if(!panel.open)panel.showModal();}
-function closePanel(){panel.close();panelKind='';if(lastFocus?.isConnected&&!lastFocus.disabled)lastFocus.focus();else $(immersed?'#leave-space':'#enter-space').focus();}
+function stepSpace(n){const list=allScenes();setScene(list[(list.findIndex(s=>s.id===current)+n+list.length)%list.length].id);}
+function collect(id){if(!fragments[id]||state.found.includes(id))return false;const doorWasReady=doorReady(state.found);state.found.push(id);const stored=save();count();renderHotspots();toast(!stored?'Fragment found · storage unavailable; export your notebook to keep it':!doorWasReady&&doorReady(state.found)?'A door is waiting. Try knock at a terminal.':`Fragment saved · ${state.found.length} of ${totalFragments}`);return true;}
+function showPanel(label,kind){if(!panel.open)lastFocus=document.activeElement;unlockAttempt++;$('#panel-label').textContent=label;panelKind=kind;content.replaceChildren();if(!panel.open)panel.showModal();}
+function closePanel(){unlockAttempt++;panel.close();panelKind='';if(lastFocus?.isConnected&&!lastFocus.disabled)lastFocus.focus();else $(immersed?'#leave-space':'#enter-space').focus();}
 function prose(text){const p=document.createElement('p');p.className='panel-prose';p.textContent=text;content.append(p);}
 function openFragment(id){const f=fragments[id];showPanel(f.source,'fragment');content.innerHTML=`<p class="panel-eyebrow">SOMETHING LEFT BEHIND</p><h2 class="panel-title">${f.title}</h2>`;prose(f.body);const b=document.createElement('button');b.className='primary panel-action';b.textContent=state.found.includes(id)?'Saved in your notebook ✓':'Keep this fragment ↗';b.disabled=state.found.includes(id);b.addEventListener('click',()=>{collect(id);b.textContent='Saved in your notebook ✓';b.disabled=true;});content.append(b);}
 function openObservation(i){const n=observations[i];showPanel(`${n.time} / FIELD NOTES`,'observation');content.innerHTML=`<p class="panel-eyebrow">OBSERVATION 00${i+1}</p><h2 class="panel-title">${n.title}</h2>`;prose(n.body);const hint=document.createElement('p');hint.className='panel-hint';hint.textContent='An imagined field note from this place.';content.append(hint);}
 function openNotebook(tab='fragments'){
- showPanel('YOUR FIELD NOTEBOOK','notebook');content.innerHTML=`<h2 class="panel-title">Things worth keeping.</h2><p class="panel-hint">Your notes and discoveries stay in this browser. Export a copy to take them with you.</p><div class="notebook-tabs"><button id="tab-fragments" class="${tab==='fragments'?'active':''}">Fragments · ${state.found.length}/7</button><button id="tab-notes" class="${tab==='notes'?'active':''}">Your notes</button></div><div id="notebook-body"></div><div class="note-actions"><button class="panel-secondary" id="export-notebook">Export notebook ↓</button><span class="panel-hint" id="save-status">${storageAvailable?'Stored on this device':'Storage unavailable — export before leaving'}</span></div>`;
+ showPanel('YOUR FIELD NOTEBOOK','notebook');content.innerHTML=`<h2 class="panel-title">Things worth keeping.</h2><p class="panel-hint">Your notes and discoveries stay in this browser. Export a copy to take them with you.</p><div class="notebook-tabs"><button id="tab-fragments" class="${tab==='fragments'?'active':''}">Fragments · ${state.found.length}/${totalFragments}</button><button id="tab-notes" class="${tab==='notes'?'active':''}">Your notes</button></div><div id="notebook-body"></div><div class="note-actions"><button class="panel-secondary" id="export-notebook">Export notebook ↓</button><span class="panel-hint" id="save-status">${storageAvailable?'Stored on this device':'Storage unavailable — export before leaving'}</span></div>`;
  const body=$('#notebook-body');
  if(tab==='fragments'){
   if(!state.found.length)body.innerHTML='<p class="panel-prose">Nothing here yet. Enter a space, look for a note, or follow a faint signal. There is no hurry.</p>';
   state.found.forEach(id=>{const f=fragments[id],article=document.createElement('article');article.className='fragment';article.innerHTML=`<span class="mono">${f.source}</span><h3>${f.title}</h3>`;const p=document.createElement('p');p.textContent=f.body;article.append(p);body.append(article);});
-  if(state.found.length===7){const p=document.createElement('p');p.className='panel-prose';p.textContent='All seven fragments are here. Nothing unlocks a leaderboard. Nothing asks you to come back tomorrow. You found the place. It is yours to return to.';body.append(p);}
+  if(state.found.length===totalFragments){const p=document.createElement('p');p.className='panel-prose';p.textContent='All the listed fragments are here. Nothing unlocks a leaderboard. Nothing asks you to come back tomorrow. You found the place. It is yours to return to.';body.append(p);}
  }else{body.innerHTML='<label class="panel-hint" for="personal-notes">What did you notice tonight?</label><textarea id="personal-notes" class="notebook-text" maxlength="20000" placeholder="A thought, a strange detail, a place you remember…"></textarea>';$('#personal-notes').value=state.notes;$('#personal-notes').addEventListener('input',e=>{state.notes=e.target.value;$('#save-status').textContent=save()?'Saved on this device':'Storage unavailable — export before leaving';});}
  $('#tab-fragments').onclick=()=>openNotebook();$('#tab-notes').onclick=()=>openNotebook('notes');$('#export-notebook').onclick=exportNotebook;
 }
@@ -63,15 +70,18 @@ function openTerminal(){
  print('liminalOS / after-hours session\nConnection: somewhere in between\nType “help” to find your way.');
  const run=value=>{const raw=value.trim();if(!raw)return;history.push(raw);historyIndex=history.length;print(`visitor ~ $ ${raw}`,'command');const [cmd,...args]=raw.toLowerCase().split(/\s+/);const arg=args.join(' ');input.value='';
   switch(cmd){
-   case 'help':print('help             a little orientation\nls               things in this space\ncat note.txt     read what was left behind\nwhoami           a familiar question\npwd              where you ended up\nscan             listen for local signals\ntune <MHz>       tune a known frequency\nwalk <place>     atrium / rooftop / server\nmap              see the floor plan\nnotebook         things worth keeping\ntea              take a small break\nclear            a fresh screen\nexit             close the terminal');break;
-   case 'ls':print('note.txt    receiver.dev    kettle.sh\nA patient cursor. A chair that is still warm.');break;
-   case 'cat':if(arg==='note.txt')print(fragments[`${current}-note`].body+'\n\nFind the note in the space to keep it.');else print('No such file. Try: cat note.txt');break;
+   case 'help':print('help             a little orientation\nls               things in this space\ncat note.txt     read what was left behind\nwhoami           a familiar question\npwd              where you ended up\nscan             listen for local signals\ntune <MHz>       tune a known frequency\nwalk <place>     use places below\nmap              see the floor plan\nnotebook         things worth keeping\ntea              take a small break\nclear            a fresh screen\nexit             close the terminal');print('Places: '+allScenes().map(s=>s.id).join(', '));break;
+   case 'ls':print('note.txt    receiver.dev    kettle.sh\nA patient cursor. A chair that is still warm.');if(arg==='-a'||doorReady(state.found))print('.door — the shell understands knock');break;
+   case 'cat':if(arg==='note.txt')print((current==='unlisted'?hiddenLetter.body:fragments[`${current}-note`].body)+'\n\nA little evidence that someone was here.');else print('No such file. Try: cat note.txt');break;
    case 'whoami':print('visitor@in-between\nA curious person with permission to be here.');break;
    case 'pwd':print(`/after-hours/${current}\n${scene().name} · ${scene().time}`);break;
-   case 'scan':print(`Listening locally…\nA faint carrier somewhere between ${(scene().frequency-.8).toFixed(1)} and ${(scene().frequency+.8).toFixed(1)} MHz.\nThe note may have a more precise frequency.`);break;
-   case 'tune':if(!arg||!Number.isFinite(Number(arg)))print('Usage: tune 93.7');else if(isTuned(arg,scene().frequency)){collect(`${current}-signal`);print(fragments[`${current}-signal`].body+'\n\nTransmission saved to your notebook.');}else print('Static. Try the frequency written on the note.');break;
-   case 'walk':if(scenes.some(s=>s.id===arg)){setScene(arg);$('#panel-label').textContent=`${scene().level} / LOCAL TERMINAL`;print(`${scene().name}.\n${scene().status}`);}else print('Places: atrium, rooftop, server');break;
+   case 'scan':if(current==='unlisted'){print('No carrier. The room is quiet on purpose.');break;}print(`Listening locally…\nA faint carrier somewhere between ${(scene().frequency-.8).toFixed(1)} and ${(scene().frequency+.8).toFixed(1)} MHz.\nThe note may have a more precise frequency.`);break;
+   case 'tune':if(current==='unlisted'){print('The receiver has gone quiet.');break;}if(!arg||!Number.isFinite(Number(arg)))print('Usage: tune 93.7');else if(isTuned(arg,scene().frequency)){collect(`${current}-signal`);print(fragments[`${current}-signal`].body+'\n\nTransmission saved to your notebook.');}else print('Static. Try the frequency written on the note.');break;
+   case 'walk':if(allScenes().some(s=>s.id===arg)){setScene(arg);$('#panel-label').textContent=`${scene().level} / LOCAL TERMINAL`;print(`${scene().name}.\n${scene().status}`);}else print('Places: '+allScenes().map(s=>s.id).join(', '));break;
    case 'tea':case './kettle.sh':collect('tea');print(fragments.tea.body+'\n\nA small ritual saved to your notebook.');break;
+   case 'knock':openDoor();return;
+   case 'man':if(arg==='night')print('NIGHT(1)\nNo arguments required. Exit whenever you are ready.');else print('The night manual is available: man night');break;
+   case 'uptime':print('Up long enough. The machine can take the next shift.');break;
    case 'map':openMap();return;
    case 'notebook':openNotebook();return;
    case 'clear':output.replaceChildren();break;
@@ -83,11 +93,46 @@ function openTerminal(){
  };
  $('#terminal-form').onsubmit=e=>{e.preventDefault();run(input.value);};$$('[data-command]').forEach(b=>b.onclick=()=>run(b.dataset.command));input.addEventListener('keydown',e=>{if(e.key==='ArrowUp'){e.preventDefault();historyIndex=Math.max(0,historyIndex-1);input.value=history[historyIndex]||'';}if(e.key==='ArrowDown'){e.preventDefault();historyIndex=Math.min(history.length,historyIndex+1);input.value=history[historyIndex]||'';}});input.focus();
 }
-function openMap(){showPanel('BUILDING DIRECTORY / AFTER HOURS','map');content.innerHTML='<h2 class="panel-title">A few places to get lost.</h2><p class="panel-hint">All three spaces are open. The journey is yours to choose.</p><svg class="floor-map" viewBox="0 0 500 220" role="img" aria-label="Rooftop, atrium and server room connected by a central stairwell"><g fill="none" stroke="currentColor" opacity=".35"><path d="M60 20h210v45H60zM90 90h300v55H90zM150 170h270v40H150zM300 20h25v190M270 42h55M325 115h65M325 190h95"/><path d="M301 30h23m-23 10h23m-23 10h23m-23 25h23m-23 10h23m-23 70h23m-23 10h23"/></g><text x="80" y="47">09 / ROOFTOP RELAY</text><text x="110" y="122">00 / ATRIUM</text><text x="170" y="195">−01 / WARM MACHINE</text></svg><div class="map-list">'+scenes.map(s=>`<button data-map-scene="${s.id}">${s.name}<span>${s.level} ${s.id===current?'· YOU ARE HERE':'↗'}</span></button>`).join('')+'</div>';$$('[data-map-scene]').forEach(b=>b.onclick=()=>{setScene(b.dataset.mapScene);closePanel();enterSpace();});}
+function openMap(){
+ showPanel('BUILDING DIRECTORY / AFTER HOURS','map');
+ content.innerHTML='<h2 class="panel-title">A few places to get lost.</h2><p class="panel-hint">'+scenes.length+' listed spaces. The journey is yours to choose.</p><div class="map-list">'+allScenes().map((s,i)=>`<button data-map-scene="${s.id}"><span>${s.id==='unlisted'?'??':two(i+1)}</span> ${escapeHTML(s.name)}<span>${escapeHTML(s.level)} ${s.id===current?'· YOU ARE HERE':'→'}</span></button>`).join('')+'</div>';
+ if(doorReady(state.found)){const b=document.createElement('button');b.className='text-button panel-action';b.textContent=hiddenScene?'Visit the unlisted room →':'There is a door missing from this list. Knock →';b.onclick=()=>hiddenScene?(closePanel(),setScene('unlisted'),enterSpace()):openDoor();content.append(b);}
+ $$('[data-map-scene]').forEach(b=>b.onclick=()=>{setScene(b.dataset.mapScene);closePanel();enterSpace();});
+}
 function openQuiet(){showPanel('A LITTLE TIME / NOTHING REQUIRED','quiet');content.innerHTML='<div class="quiet-message"><p class="panel-eyebrow">YOU CAN JUST BE HERE.</p><h2 class="panel-title">Let the world<br>run without you.</h2><p class="panel-prose">No timer. No streak. No next task.<br>Just a little light in a very large room.</p><button id="quiet-sound" class="panel-secondary">'+(audio.active?'Turn the sound off':'Let the room hum')+'</button><div class="volume-control"><label for="volume">AMBIENCE VOLUME</label><input id="volume" type="range" min="0" max="100" value="'+Math.round(audio.volume*100)+'"></div><button id="quiet-view" class="text-button">Watch the empty room ↗</button></div>';$('#quiet-sound').onclick=async()=>{await toggleSound();$('#quiet-sound').textContent=audio.active?'Turn the sound off':'Let the room hum';};$('#volume').oninput=e=>audio.setVolume(Number(e.target.value)/100);$('#quiet-view').onclick=()=>{closePanel();enterSpace();};}
-function openAbout(){showPanel('LIMINAL HACKER / ABOUT THIS PLACE','about');content.innerHTML='<p class="panel-eyebrow">HACKING THE IN-BETWEEN, AFTER HOURS.</p><h2 class="panel-title">Empty, but not alone.</h2>';prose('Kenopsia: the strange feeling of a place usually full of people, now quiet.\n\nThis is an interactive sketch of that feeling, with a little warmth left inside it. Three imagined spaces. Seven small fragments. A terminal that has time for you.\n\nThe hacker here is a curious tinkerer: learning, repairing, and exploring systems with permission.\n\nEvery fresh visit opens a different space. “Stay here” remembers a favourite. Sound is optional and begins only when you ask. No jump scares or flashing effects.');const p=document.createElement('p');p.className='panel-hint';p.textContent='Original fictional writing and AI-created scene artwork. Notes and discoveries are saved only in this browser; clearing site data removes them. No analytics or external assets are loaded by the site. The hosting service may keep ordinary access logs.';content.append(p);}
-function openPanel(kind){({terminal:openTerminal,radio:openRadio,notebook:openNotebook,map:openMap,quiet:openQuiet,about:openAbout}[kind]||openAbout)();}
-async function toggleSound(){try{await audio.toggle(current);const active=audio.active;$('#sound-toggle').setAttribute('aria-pressed',String(active));$('#sound-label').textContent=active?'Sound on':'Sound off';$('#explore-sound').textContent=active?'Sound on':'Sound off';}catch{toast('Sound could not start in this browser. The spaces work in silence, too.');}}
+function openAbout(){showPanel('LIMINAL HACKER / ABOUT THIS PLACE','about');content.innerHTML='<p class="panel-eyebrow">HACKING THE IN-BETWEEN, AFTER HOURS.</p><h2 class="panel-title">Empty, but not alone.</h2>';prose('Kenopsia: the strange feeling of a place usually full of people, now quiet.\n\nThis is an interactive sketch of that feeling, with a little warmth left inside it. An expanding collection of imagined spaces and small fragments. A terminal that has time for you.\n\nThe hacker here is a curious tinkerer: learning, repairing, and exploring systems with permission.\n\nEvery fresh visit opens a different space. “Stay here” remembers a favourite. Sound is optional and begins only when you ask. No jump scares or flashing effects.');const p=document.createElement('p');p.className='panel-hint';p.textContent='Original fictional writing and AI-created scene artwork. Notes and discoveries are saved only in this browser; clearing site data removes them. No analytics or external assets are loaded by the site. The hosting service may keep ordinary access logs.';content.append(p);}
+function openSecretLetter(){if(!hiddenLetter)return;showPanel('A LETTER / ON THE OTHER SIDE','secretLetter');const title=document.createElement('h2');title.className='panel-title';title.textContent=hiddenLetter.title;content.append(title);prose(hiddenLetter.body);}
+function openDoor(){
+ showPanel('AN UNLISTED DOOR','door');
+ content.innerHTML='<p class="panel-eyebrow">SOMETHING THE DIRECTORY LEFT OUT</p><h2 class="panel-title">Three things to carry.</h2>';
+ if(hiddenScene){prose('The door remembers you for this visit.');const b=document.createElement('button');b.className='primary panel-action';b.textContent='Go back inside →';b.onclick=()=>{closePanel();setScene('unlisted');enterSpace();};content.append(b);return;}
+ if(!doorReady(state.found)){
+  prose('A mark in the wood: listen at the shelf, the water, and the departure. Keep their transmissions. Then make a little tea.');
+  const list=document.createElement('ul');list.className='door-progress';
+  const labels=['The overnight stacks transmission','The still-water room transmission','The last platform transmission','A cup of tea at a terminal'];
+  doorPrerequisites.forEach((id,i)=>{const item=document.createElement('li');item.textContent=`${state.found.includes(id)?'✓':'○'} ${labels[i]}`;list.append(item);});content.append(list);return;
+ }
+ prose('Each transmission asks for one word. Bring them in order: the shelf, the water, the departure.');
+ const form=document.createElement('form');form.className='door-form';form.innerHTML='<label for="door-shelf">01 / The shelf</label><input id="door-shelf" name="shelf" required maxlength="40" autocomplete="off" spellcheck="false" placeholder="What the light leaves"><label for="door-water">02 / The water</label><input id="door-water" name="water" required maxlength="40" autocomplete="off" spellcheck="false" placeholder="What moves beneath"><label for="door-departure">03 / The departure</label><input id="door-departure" name="departure" required maxlength="40" autocomplete="off" spellcheck="false" placeholder="What you cross"><p class="panel-hint" id="door-feedback" role="status">The door will recognise the words.</p><button type="submit" class="primary">Try the door →</button>';
+ content.append(form);
+ form.onsubmit=async e=>{
+  e.preventDefault();const attempt=++unlockAttempt,button=$('button',form),feedback=$('#door-feedback');
+  const answers=[$('#door-shelf').value,$('#door-water').value,$('#door-departure').value];button.disabled=true;feedback.textContent='Listening at the lock…';
+  try{
+   if(!globalThis.crypto?.subtle)throw new Error('This door needs HTTPS or localhost.');
+   const response=await fetch('vault/door.json');if(!response.ok)throw new Error('The door is out of reach. Please try again.');
+   const room=validateRoom(await decryptBundle(await response.json(),answers));
+   if(attempt!==unlockAttempt||!panel.open)return;
+   if(hiddenImageURL)URL.revokeObjectURL(hiddenImageURL);
+   hiddenImageURL=URL.createObjectURL(new Blob([room.image],{type:'image/webp'}));hiddenLetter=room.letter;
+   hiddenScene={...room.scene,sound:'pages',image:hiddenImageURL,hotspots:[{x:65,y:51,label:'A letter on the desk',type:'secretLetter'},{x:80,y:64,label:'A terminal at rest',type:'terminal'}]};
+   $$('input',form).forEach(input=>input.value='');closePanel();setScene('unlisted');enterSpace();toast('The door was never a wall. Welcome inside.');
+  }catch(error){if(attempt===unlockAttempt&&panel.open)feedback.textContent=error.name==='OperationError'?'The lock stays quiet. Check the three words and their order.':error.message||'The door could not open. Try again.';}
+  finally{answers.fill('');if(attempt===unlockAttempt&&panel.open)button.disabled=false;}
+ };
+}
+function openPanel(kind){({terminal:openTerminal,radio:openRadio,notebook:openNotebook,map:openMap,quiet:openQuiet,about:openAbout,secretLetter:openSecretLetter}[kind]||openAbout)();}
+async function toggleSound(){try{await audio.toggle(scene().sound);const active=audio.active;$('#sound-toggle').setAttribute('aria-pressed',String(active));$('#sound-label').textContent=active?'Sound on':'Sound off';$('#explore-sound').textContent=active?'Sound on':'Sound off';}catch{toast('Sound could not start in this browser. The spaces work in silence, too.');}}
 
 $('#enter-space').onclick=enterSpace;$('#leave-space').onclick=leaveSpace;$('#previous-space').onclick=()=>stepSpace(-1);$('#next-space').onclick=()=>stepSpace(1);
 $('#drift').onclick=()=>{setScene(chooseScene({last:current}));window.scrollTo({top:0,behavior:'smooth'});toast(`Arrived at ${scene().name.toLowerCase()}.`);};
@@ -95,7 +140,7 @@ $('#lock-scene').onclick=()=>{state.locked=state.locked===current?null:current;c
 $('#sound-toggle').onclick=toggleSound;$('#explore-sound').onclick=toggleSound;$('#stay-awhile').onclick=openQuiet;
 $$('[data-open]').forEach(b=>b.onclick=()=>openPanel(b.dataset.open));$$('[data-note]').forEach(b=>b.onclick=()=>openObservation(Number(b.dataset.note)));
 $('#close-panel').onclick=closePanel;panel.addEventListener('click',e=>{if(e.target===panel){const r=panel.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closePanel();}});
-panel.addEventListener('close',()=>{panelKind='';});
+panel.addEventListener('close',()=>{panelKind='';unlockAttempt++;if(!document.activeElement||document.activeElement===document.body)$(immersed?'#leave-space':'#enter-space').focus();});
 document.addEventListener('keydown',e=>{if(panel.open)return;if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;if(e.key==='Escape'&&immersed)leaveSpace();if(e.key==='`'||e.key==='~'){e.preventDefault();openTerminal();}if(immersed&&e.key==='ArrowRight')stepSpace(1);if(immersed&&e.key==='ArrowLeft')stepSpace(-1);});
 document.addEventListener('visibilitychange',()=>audio.pauseHidden(document.hidden).catch(()=>{}));
 function tick(){$('#local-time').textContent=`LOCAL TIME — ${new Date().toLocaleTimeString('en-GB',{hour12:false})}`;}tick();setInterval(tick,1000);

@@ -1,1 +1,1 @@
-{"name":"liminal-hacker","version":"1.0.0","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.mjs","check":"node --check dist/app.js && node --check dist/core.js && node --check dist/audio.js"}}
+{"name":"liminal-hacker","version":"2.0.0","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.mjs","check":"node --check dist/app.js && node --check dist/core.js && node --check dist/themes.js && node --check dist/audio.js && node --check dist/vault.js && node --check scripts/vault.mjs"}}

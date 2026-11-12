@@ -4,11 +4,11 @@
 
 ## The experience
 
-- Three cinematic spaces: **The atrium**, **The rooftop relay**, and **The warm machine**. Each has original scene artwork, a different palette, writing, sound and discoveries.
+- Nine cinematic spaces: **The atrium**, **The rooftop relay**, and **The warm machine**, plus a midnight laundromat, last platform, still-water pool, closed concourse, overnight stacks, and motel corridor. Each has original scene artwork, a different palette, writing, sound and discoveries.
 - A random arrival on each load avoids the last visited space. **Stay here** pins a favourite. A direct link such as `?space=rooftop` overrides the arrival choice.
 - **Enter the space** opens an immersive view with keyboard-accessible hotspots. Left/right arrows move between spaces; Escape returns to the site.
-- An imagined local terminal (`~` shortcut) supports `help`, `ls`, `cat note.txt`, `whoami`, `pwd`, `scan`, `tune <MHz>`, `walk <atrium|rooftop|server>`, `map`, `notebook`, `tea`, `clear`, and `exit`. This is a fictional shell, not a command runner or a network scanner.
-- Tune the radio to the frequency written on each room's note. Three physical notes, three transmissions, and a small terminal ritual make seven fragments.
+- An imagined local terminal (`~` shortcut) supports `help`, `ls`, `cat note.txt`, `whoami`, `pwd`, `scan`, `tune <MHz>`, `walk <place>`, `map`, `notebook`, `tea`, `clear`, and `exit`. This is a fictional shell, not a command runner or a network scanner.
+- Tune the radio to the frequency written on each room's note. Nine physical notes, nine transmissions, and a small terminal ritual make nineteen fragments.
 - A field notebook stores discoveries and personal notes locally, with JSON export. Local storage is validated and storage failure is surfaced without breaking the site.
 - Optional, locally synthesized Web Audio ambience. No autoplay. Volume control under **Stay awhile**. Audio pauses in a hidden tab. No external music or audio assets.
 - Responsive layouts, visible keyboard focus, semantic buttons, native modal focus management, reduced-motion support, and no jump scares or flashing effects.
@@ -36,13 +36,20 @@ npm test
 
 | File | Purpose |
 | --- | --- |
-| `dist/core.js` | Scenes, titles, frequencies, hotspots, fragments and field notes |
+| `dist/themes.js` | Editable theme definitions, titles, colours, frequencies, hotspots and fragments |
+| `dist/core.js` | Scene normalization, persistence validation and field-note essays |
 | `dist/style.css` | Responsive layout, typography and room palettes |
 | `dist/app.js` | Exploration, terminal, notebook, radio and navigation |
 | `dist/audio.js` | Procedural sound layers and volume |
 | `dist/assets/*.webp` | Optimized original scene art |
 
-Add scenes to `scenes` in `core.js`, add matching art and palette rules, and update the explicit three-space/seven-fragment labels if expanding the world. `assets/ARTWORK.md` records the visual briefs and provenance.
+See **[the customization guide](docs/CUSTOMIZING.md)** for a copyable theme entry, field descriptions, and encrypted-room authoring commands. Counts and navigation update automatically from `dist/themes.js`. The original artwork briefs are in `dist/assets/ARTWORK.md`; additions are in `docs/NEW-ARTWORK.md`.
+
+## The unlisted room
+
+There is also an encrypted bonus room. Follow the transmissions in the new spaces and see what the terminal notices. Its artwork, name, and writing are not shipped as plaintext. AES-256-GCM protects the bundle; the visitor supplies the phrase derived from clues. This keeps the room out of casual image-directory and source browsing, but is deliberately **a puzzle, not a security boundary**. The progress gate is client-side, clues can be solved from source, phrase guesses can be tried offline, and unlocked content can be copied. The customization guide explains the limits without publishing the answer.
+
+Secret-room decryption uses browser Web Crypto and requires HTTPS or localhost. It lasts for the current page session; the decrypted room and phrase are not saved in local storage.
 
 ## Privacy and fiction
 

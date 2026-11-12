@@ -14,3 +14,15 @@ html[data-scene=rooftop]{--accent:#b9bbdf;--line:rgba(190,193,223,.2);--surface:
 .primary>span:before{content:'';position:absolute;right:1px;top:1px;width:9px;height:9px;border-top:1px solid currentColor;border-right:1px solid currentColor}
 .primary>span:after{content:'';position:absolute;left:1px;bottom:1px;width:14px;height:1px;background:currentColor;transform:rotate(-45deg);transform-origin:left center}
 @media(max-width:700px){.hero h1{font-size:clamp(42px,11.4vw,65px);letter-spacing:-1.8px}.hero-actions{gap:18px}}
+/* Theme accents come from themes.js; new spaces need no CSS edits. */
+.hero-description{white-space:pre-line}
+.space-list{row-gap:34px}
+.map-list button{gap:18px;align-items:center}
+.map-list button>span:first-child{min-width:22px}
+.map-list button>span:last-child{margin-left:auto}
+.door-form{display:grid;gap:10px;margin-top:25px}
+.door-form label{font:10px var(--mono);color:var(--accent);margin-top:8px;letter-spacing:1px}
+.door-form input{background:#132020;border:1px solid var(--line);color:var(--ink);padding:12px;font:14px var(--mono);width:100%;min-width:0}
+.door-form .primary{justify-content:center;min-height:44px}
+.door-progress{list-style:none;padding:0;color:var(--muted);font:12px/2.5 var(--mono)}
+@media(max-width:700px){.space-list{row-gap:24px}.door-progress{font-size:10px}.map-list button{font-size:11px;gap:10px}.map-list button span{font-size:8px}}
