@@ -1,0 +1,32 @@
+export const scenes = [
+  {id:'atrium',name:'The atrium',level:'LEVEL 00',time:'02:17',subtitle:'The building forgot to close.',status:'A light left on for no one.',title:'Everyone left.<br><em>You stayed.</em>',description:'The lights are still on. The network is still alive.<br>Somewhere between the last train and the first light,<br>there’s a little room to be yourself.',hint:'There is a note beside the terminal.',frequency:93.7,sound:'hum',hotspots:[{x:73,y:52,label:'A folded note',type:'fragment',fragment:'atrium-note'},{x:45,y:69,label:'A faint transmission',type:'radio'},{x:83,y:67,label:'The waiting terminal',type:'terminal'}]},
+  {id:'rooftop',name:'The rooftop relay',level:'LEVEL 09',time:'03:06',subtitle:'Some signals never sleep.',status:'Rain on a frequency of its own.',title:'No one above.<br><em>Nothing urgent.</em>',description:'A little rain. A distant signal. A door left ajar.<br>The city has gone quiet, but something out there<br>is still trying to say hello.',hint:'The relay is picking up something between stations.',frequency:104.2,sound:'rain',hotspots:[{x:72,y:34,label:'Tune the relay',type:'radio'},{x:38,y:65,label:'A waterlogged page',type:'fragment',fragment:'rooftop-note'},{x:84,y:57,label:'The service terminal',type:'terminal'}]},
+  {id:'server',name:'The warm machine',level:'LEVEL −01',time:'04:41',subtitle:'Still listening. Still here.',status:'The kettle has just finished.',title:'A cold world.<br><em>A warm machine.</em>',description:'Beyond the last locked door, a small light burns.<br>A cup of tea. A patient cursor. The quiet company<br>of things that don’t ask you to explain.',hint:'The shift log has one unfinished entry.',frequency:88.4,sound:'fans',hotspots:[{x:67,y:61,label:'Read the shift log',type:'fragment',fragment:'server-note'},{x:39,y:45,label:'Listen to the rack',type:'radio'},{x:81,y:53,label:'Pull up a chair',type:'terminal'}]}
+];
+export const fragments = {
+ 'atrium-note':{title:'For whoever is still here',source:'ATRIUM / FOLDED NOTE',body:'The lights on this floor are not on a timer. Someone has to turn them off.\n\nI used to wonder who kept forgetting. Now I wonder who they were leaving them on for.\n\nP.S. The receiver drifts. Try 93.7.'},
+ 'atrium-signal':{title:'An unlisted extension',source:'ATRIUM / 93.7 MHz',body:'“If you can hear this, the building has not forgotten you.\n\nThere is a room below the ground floor. The sign says maintenance. It has always meant something else.”'},
+ 'rooftop-note':{title:'Weather report',source:'ROOFTOP / WATERLOGGED PAGE',body:'03:06. Light rain. No one on the streets below.\n\nThe antenna is not broken. It is listening in a direction we no longer use.\n\n104.2. Wait for the space between the static.'},
+ 'rooftop-signal':{title:'A station with no name',source:'ROOFTOP / 104.2 MHz',body:'“This is the overnight service. There are no announcements. There are no delays.\n\nWherever you are, you may remain there for a little while.”'},
+ 'server-note':{title:'The unfinished shift',source:'SERVER ROOM / SHIFT LOG',body:'04:41 — backups verified.\n04:42 — fan replaced.\n04:43 — tea.\n04:44 — found the old receiver. 88.4 still works.\n04:45 —\n\nThe cursor waits on the next line. It does not seem impatient.'},
+ 'server-signal':{title:'A quiet acknowledgement',source:'SERVER ROOM / 88.4 MHz',body:'“We received your message. No further action is required.\n\nThe machine can keep watch for a while. You have done enough for tonight.”'},
+ 'tea':{title:'Permission to stay',source:'TERMINAL / A SMALL RITUAL',body:'The kettle clicks off. Nothing needs to happen.\n\nOutside, a city full of sleeping people continues to exist without your supervision. Inside, for a moment, you are not late for anything.\n\nWelcome back, liminal hacker.'}
+};
+export const observations=[
+ {time:'02:17',title:'The hum is a kind of company.',body:'A server room is never really empty.\n\nThere are fans remembering their speed. Disks keeping a small promise. A UPS holding its breath for a power cut that may never come.\n\nIn the daytime, this is infrastructure. At two in the morning, it feels more like weather.\n\nYou sit down at the terminal and type a command you already know the answer to. Not because anything is broken. Just to hear something answer.\n\nThe hum continues. For now, that is enough.'},
+ {time:'03:06',title:'Permission to be nowhere.',body:'A corridor is designed to be passed through. A lobby expects an arrival. A departure lounge insists that you are going somewhere.\n\nBut occasionally the purpose drains out of a place, and something gentler appears in its absence.\n\nA chair is just a chair. A window is a rectangle of dark. There is no one here to ask what you are doing.\n\nWe call these places empty. Perhaps we mean available.\n\nPerhaps the strange comfort is simply this: for once, the space has no expectations of you.'},
+ {time:'04:41',title:'Someone left a port open.',body:'Curiosity is a quiet thing when nobody is watching.\n\nAn unfamiliar connector. A forgotten manual. A little board with a serial header and no explanation.\n\nHacking, here, means learning how a thing thinks. Following the traces. Reading the source. Repairing something you were told to replace.\n\nThe systems are yours, or you have permission. The tea is hot. The next question is more interesting than the last answer.\n\nThere are plenty of doors you do not need to force. Some were waiting for you to notice the handle.'}
+];
+export function chooseScene({locked=null,last=null,requested=null}={},random=Math.random){
+ const valid=id=>scenes.some(s=>s.id===id);
+ if(valid(requested))return requested;
+ if(valid(locked))return locked;
+ const choices=scenes.filter(s=>s.id!==last);
+ return choices[Math.min(choices.length-1,Math.max(0,Math.floor(random()*choices.length)))].id;
+}
+export function signalStrength(value,target){return Math.max(0,1-Math.abs(Number(value)-target)/3);}
+export function isTuned(value,target){return Number.isFinite(Number(value))&&Math.abs(Number(value)-target)<.051;}
+export function readState(raw){
+ const empty={version:1,found:[],notes:'',locked:null,last:null};
+ try{const d=JSON.parse(raw);if(!d||typeof d!=='object')return empty;return {...empty,found:Array.isArray(d.found)?[...new Set(d.found.filter(x=>Object.hasOwn(fragments,x)))]:[],notes:typeof d.notes==='string'?d.notes.slice(0,20000):'',locked:scenes.some(s=>s.id===d.locked)?d.locked:null,last:scenes.some(s=>s.id===d.last)?d.last:null};}catch{return empty;}
+}
