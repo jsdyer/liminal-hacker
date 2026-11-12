@@ -6,6 +6,10 @@ The first arrival is random. Refreshing brings you back to it. A compact horizon
 
 Default pacing: the first passage after 15 minutes, then one new passage every 60–120 minutes. Waiting does not stack several unused passages. The visitor chooses when to go through an available passage, and the next wait begins then. Previously discovered places remain freely revisitable. The old random-on-refresh behaviour has been retired.
 
+## The night desk
+
+Open `/admin` for a purpose-built operator workspace: aggregate discovery statistics, location editing and encrypted image uploads, rarity and release schedules, a pacing simulator, quiet timed transmissions, a discovery pause switch, clue-route/image health checks, private shift notes, draft publication and recoverable history. See [the operating guide](docs/ADMIN.md). Hosted operator access is restricted by the runtime owner email allowlist.
+
 ## Change the experience
 
 | Change | File |
@@ -18,6 +22,8 @@ Default pacing: the first passage after 15 minutes, then one new passage every 6
 | Server-owned discovery and authorization | `worker/service.js` |
 | Artwork encryption | `worker/art.js`, `scripts/art.mjs` |
 
+Once a draft is first saved in the desk, database settings take precedence over these seed files. Use the desk for day-to-day changes.
+
 See [customization](docs/CUSTOMIZING.md), [discovery design](docs/DISCOVERY.md), and [self-hosting](docs/SELF-HOSTING.md).
 
 ## What is here
@@ -28,7 +34,7 @@ Every location has original artwork, a palette, optional synthesized ambience, a
 
 ## Server and build
 
-The browser remains plain HTML/CSS/JavaScript. The pacing feature now needs a backend; a static upload alone cannot enforce it. No npm dependencies are required. Node 24+ provides the local runtime and SQLite adapter. Production on Sites uses a Worker and D1, with identity supplied by the hosting service.
+The browser remains plain HTML/CSS/JavaScript. The pacing feature now needs a backend; a static upload alone cannot enforce it. No npm dependencies are required. Node 24+ provides the local runtime and SQLite adapter. Production on Sites uses a Worker, D1 and private R2 artwork storage, with identity supplied by the hosting service.
 
 ```sh
 # Configure .env using .env.example, including the existing artwork key.

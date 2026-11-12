@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {createService} from '../worker/service.js';
 import {encryptArt,toBase64} from '../worker/art.js';
 import {sqliteDB} from '../scripts/sqlite.mjs';
-const sql=await readFile(new URL('../drizzle/0000_journeys.sql',import.meta.url),'utf8');
+const sql=(await Promise.all(['0000_journeys','0001_night_desk'].map(n=>readFile(new URL('../drizzle/'+n+'.sql',import.meta.url),'utf8')))).join('\n');
 async function fixture(){
  const DB=sqliteDB();DB.raw.exec(sql);let time=1000000;
  const secret=toBase64(crypto.getRandomValues(new Uint8Array(32))),bytes=new TextEncoder().encode('image test fixture');

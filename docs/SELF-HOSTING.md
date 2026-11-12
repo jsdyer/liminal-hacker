@@ -1,5 +1,7 @@
 # Self-hosting
 
+**Night Desk update:** use [`/admin`](ADMIN.md) for live location editing, weighted discovery, schedules, pause controls and publication. Once initialized, database content takes precedence over repository seed settings. Retiring a room stops new discoveries but preserves revisits.
+
 Server-controlled discovery changes the hosting requirement. Serve the Node app behind Apache/Nginx, or deploy the Worker with D1. Do not point Apache directly at `web/` or `dist/`; that bypasses application routing and cannot run discovery.
 
 ## Node 24 and SQLite

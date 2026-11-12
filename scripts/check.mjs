@@ -1,4 +1,5 @@
 import {readdir} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
-for(const dir of ['web','worker','config','content','scripts'])for(const file of await readdir(dir)){if(!/\.(m?js)$/.test(file))continue;const r=spawnSync(process.execPath,['--check',dir+'/'+file],{stdio:'inherit'});if(r.status)process.exit(r.status);}
+async function check(dir){for(const file of await readdir(dir,{withFileTypes:true})){const path=dir+'/'+file.name;if(file.isDirectory()){if(!['art','assets','vault'].includes(file.name))await check(path);continue;}if(!/\.(m?js)$/.test(file.name))continue;const r=spawnSync(process.execPath,['--check',path],{stdio:'inherit'});if(r.status)process.exit(r.status);}}
+for(const dir of ['web','worker','config','content','scripts'])await check(dir);
 console.log('Source syntax checks passed.');

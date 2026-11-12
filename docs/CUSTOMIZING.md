@@ -1,5 +1,7 @@
 # Make this place yours
 
+**Night Desk update:** use [`/admin`](ADMIN.md) for live location editing, weighted discovery, schedules, pause controls and publication. Once initialized, database content takes precedence over repository seed settings. Retiring a room stops new discoveries but preserves revisits.
+
 Regular themes are deliberately simple to edit. Their text is in a server-side catalogue; their images are encrypted packets. The browser uses plain HTML, CSS, and JavaScript. A small server enforces discovery. Node 24+ runs the build and optional local SQLite server; no npm dependencies are required.
 
 ## Change or add a theme

@@ -1,5 +1,7 @@
 # How the building keeps its own time
 
+**Night Desk update:** use [`/admin`](ADMIN.md) for live location editing, weighted discovery, schedules, pause controls and publication. Once initialized, database content takes precedence over repository seed settings. Retiring a room stops new discoveries but preserves revisits.
+
 The server decides which rooms exist for each visitor. The browser receives only the current room and remembered rooms, an approximate next-opening time, and the number still unseen. It never receives an unlock flag or decryption key that it can edit to open a new room.
 
 ## Identity
