@@ -1,5 +1,4 @@
-// Edit a theme here, or copy one and add its image. Counts and navigation update automatically.
-// Set enabled: false to hide a public theme. See docs/CUSTOMIZING.md.
+// Server-side catalogue. Artwork is encrypted in content/art/<id>.json.
 export const themes = [
   {
     "id": "atrium",
@@ -312,5 +311,275 @@ export const themes = [
       "title": "No checkout time",
       "body": "“The night desk has received your request.\n\nThe room is ready. There is no checkout time in a place like this.\n\nLeave when the road feels like a possibility again.”"
     }
+  },
+  {
+    "id": "ferry",
+    "name": "The crossing",
+    "level": "PASSENGER DECK",
+    "time": "03:22",
+    "accent": "#c7b48e",
+    "sound": "water",
+    "heading": [
+      "No land in sight.",
+      "Still somewhere warm."
+    ],
+    "subtitle": "The shore will return when it is ready.",
+    "status": "A small light on a very dark sea.",
+    "description": "Rain on the windows. A harbour falling away.\nA table, a terminal, the low sound of an engine.\nFor a little while, nowhere can reach you.",
+    "frequency": 88.9,
+    "note": {
+      "title": "Between two shores",
+      "body": "A pencilled frequency: 88.9.\n\nSomeone has folded the sailing schedule into a paper boat. It will not take you anywhere. That seems to be the point."
+    },
+    "signal": {
+      "title": "Carry the quiet",
+      "body": "The coast disappears before the crossing begins to feel real.\n\nYou do not have to know which shore you belong to tonight. Keep the little light on until one comes into view."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/ferry"
+  },
+  {
+    "id": "planetarium",
+    "name": "The borrowed sky",
+    "level": "DOME / ROW H",
+    "time": "02:14",
+    "accent": "#c6b4dd",
+    "sound": "hum",
+    "heading": [
+      "The stars stayed on.",
+      "So did you."
+    ],
+    "subtitle": "A whole universe, indoors.",
+    "status": "The last constellation has no name.",
+    "description": "The projector keeps a sky that nobody ordered.\nAn empty seat beneath a hundred quiet worlds.\nOutside, there is probably still weather.",
+    "frequency": 89.6,
+    "note": {
+      "title": "After the last show",
+      "body": "The control desk is tuned to 89.6.\n\nA note on the projector: please leave the stars on for the cleaner. Underneath, in another hand: and whoever else needs them."
+    },
+    "signal": {
+      "title": "A ceiling with possibilities",
+      "body": "You know these stars are holes in a machine.\n\nIt does not make the feeling smaller. Sometimes knowing how a thing works is another way of being amazed by it."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/planetarium"
+  },
+  {
+    "id": "bowling",
+    "name": "The empty lanes",
+    "level": "LANE 07",
+    "time": "03:47",
+    "accent": "#cdb3b4",
+    "sound": "vent",
+    "heading": [
+      "No score to keep.",
+      "Nothing to prove."
+    ],
+    "subtitle": "The pins can wait until morning.",
+    "status": "No one is counting.",
+    "description": "A polished floor going on forever.\nThe quiet after a room full of laughter.\nYou have no score to improve tonight.",
+    "frequency": 91.4,
+    "note": {
+      "title": "An unfinished frame",
+      "body": "Someone circled 91.4 on the maintenance sheet.\n\nThe scoreboard remembers a game nobody finished. It has been patient about it."
+    },
+    "signal": {
+      "title": "A better kind of empty",
+      "body": "The building was made for noise. Without it, you notice the curve of a chair, the worn edge of a counter, the time someone spent making a place for people.\n\nThey will be back. You can enjoy what they left."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/bowling"
+  },
+  {
+    "id": "parkade",
+    "name": "The lower level",
+    "level": "P4 / EAST",
+    "time": "04:08",
+    "accent": "#a9c8b5",
+    "sound": "vent",
+    "heading": [
+      "Below the city.",
+      "Outside the noise."
+    ],
+    "subtitle": "Four floors beneath the hurry.",
+    "status": "No signal. A good connection.",
+    "description": "Concrete pillars repeat into the dark.\nAbove you, an entire city has somewhere to be.\nDown here, the next command can wait.",
+    "frequency": 92.8,
+    "note": {
+      "title": "Maintenance access",
+      "body": "A small receiver on the shelf says 92.8.\n\nThe folding chair is newer than everything else. Someone decided this corner deserved a little comfort."
+    },
+    "signal": {
+      "title": "Quiet infrastructure",
+      "body": "There are rooms beneath the rooms people talk about.\n\nA pipe is warm. A fan is turning. A tiny green light is making an honest report. You find it unexpectedly reassuring."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/parkade"
+  },
+  {
+    "id": "relay",
+    "name": "The hill station",
+    "level": "RELAY / 812 M",
+    "time": "02:38",
+    "accent": "#bac7cd",
+    "sound": "fans",
+    "heading": [
+      "A signal in the fog.",
+      "A light on the hill."
+    ],
+    "subtitle": "The mountain keeps the night shift.",
+    "status": "Carrier present. No voice required.",
+    "description": "Beyond the glass, the trees have no edges.\nThe radio racks breathe warm air into the room.\nSomething is still getting through.",
+    "frequency": 94.2,
+    "note": {
+      "title": "Antenna weather",
+      "body": "Receiver check: 94.2.\n\nThe weather log says fog, then fog, then fog again. On the fourth line: tea helped."
+    },
+    "signal": {
+      "title": "The long way home",
+      "body": "Your packets take a route through places you will never see.\n\nTonight you are in one of those places. A small warm room where the distance becomes a little less impossible."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/relay"
+  },
+  {
+    "id": "campus",
+    "name": "The open lab",
+    "level": "SCIENCE / 204",
+    "time": "02:51",
+    "accent": "#a9c5c4",
+    "sound": "hum",
+    "heading": [
+      "Class is over.",
+      "Curiosity isn’t."
+    ],
+    "subtitle": "No one has assigned this question.",
+    "status": "A cursor with no deadline.",
+    "description": "The monitors are asleep. The rain is still working.\nYou opened a manual for one small thing.\nIt is three hours later, in the best possible way.",
+    "frequency": 95.8,
+    "note": {
+      "title": "An ungraded question",
+      "body": "Try the receiver at 95.8.\n\nThe margin of an old lab manual reads: what if the interesting part is the thing they did not ask us to do?"
+    },
+    "signal": {
+      "title": "No marks for this",
+      "body": "Some of the best things you learn have no certificate, no audience, and no immediate use.\n\nYou learn them because the question follows you home. Tonight, there is room to follow it back."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/campus"
+  },
+  {
+    "id": "cinema",
+    "name": "The last screening",
+    "level": "FOYER / SCREEN 2",
+    "time": "03:16",
+    "accent": "#d3af9e",
+    "sound": "vent",
+    "heading": [
+      "The credits ended.",
+      "The feeling stayed."
+    ],
+    "subtitle": "A little longer before the outside world.",
+    "status": "The lobby is holding the silence.",
+    "description": "The final audience has gone into the rain.\nA soft red glow. A warm counter.\nYou are not quite ready to leave the story.",
+    "frequency": 100.6,
+    "note": {
+      "title": "After the credits",
+      "body": "The projection-room radio is set to 100.6.\n\nOn the back of a ticket: stay until the lights come up. Then stay a little longer."
+    },
+    "signal": {
+      "title": "The room after the room",
+      "body": "A film ends twice. Once on the screen, and later, when you finally stop carrying its light around.\n\nThis lobby seems designed for the time between."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/cinema"
+  },
+  {
+    "id": "skybridge",
+    "name": "The suspended passage",
+    "level": "LEVEL 18 / LINK",
+    "time": "03:09",
+    "accent": "#c3bdd9",
+    "sound": "rain",
+    "heading": [
+      "Neither here.",
+      "Nor quite there."
+    ],
+    "subtitle": "A room made entirely of between.",
+    "status": "The city moves without making a sound.",
+    "description": "Two buildings holding a corridor above the street.\nRain makes another city on the glass.\nHalfway across, you find a reason to stop.",
+    "frequency": 103.1,
+    "note": {
+      "title": "Halfway across",
+      "body": "The little receiver catches 103.1 here.\n\nA chair faces the window instead of either door. Somebody understood the assignment differently."
+    },
+    "signal": {
+      "title": "Suspended",
+      "body": "Most days, being between things feels like a problem to solve.\n\nBut here the architects put a roof over it. They made it somewhere you could sit down."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/skybridge"
+  },
+  {
+    "id": "diner",
+    "name": "The roadside light",
+    "level": "BOOTH 04",
+    "time": "04:32",
+    "accent": "#d5b49b",
+    "sound": "rain",
+    "heading": [
+      "The road can wait.",
+      "The coffee is warm."
+    ],
+    "subtitle": "Open, in the way a light is open.",
+    "status": "No departure time on the table.",
+    "description": "The highway disappears into the trees.\nA vinyl booth, a wall socket, a cup going cold slowly.\nFor now, this is far enough.",
+    "frequency": 104.8,
+    "note": {
+      "title": "One more refill",
+      "body": "The kitchen radio has a mark at 104.8.\n\nA receipt has been used as a bookmark. There is no total on it. Just a small drawing of a house."
+    },
+    "signal": {
+      "title": "Far enough",
+      "body": "There is a kind of travel that happens when you stop moving.\n\nThe room becomes unfamiliar, then familiar, then yours for an hour. You do not have to go any farther for tonight to count."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/diner"
+  },
+  {
+    "id": "archive",
+    "name": "The sleeping records",
+    "level": "READING ROOM B",
+    "time": "01:49",
+    "accent": "#bec2a4",
+    "sound": "pages",
+    "heading": [
+      "Nothing is lost.",
+      "Only waiting."
+    ],
+    "subtitle": "A thousand ordinary lives, carefully kept.",
+    "status": "The past is still readable.",
+    "description": "Boxes of small things that mattered to someone.\nA microfilm reader. Rain against high windows.\nThe room is full of people who are not here.",
+    "frequency": 107.7,
+    "note": {
+      "title": "Please rewind",
+      "body": "The desk receiver is on 107.7.\n\nA catalogue card has no title, only the words: the things you did not know you would miss."
+    },
+    "signal": {
+      "title": "An older kind of search",
+      "body": "You find the thing beside the thing you came for.\n\nA name. A date. An ordinary afternoon someone thought to keep. For a moment the distance between then and now feels small enough to touch."
+    },
+    "enabled": true,
+    "hint": "There is something left beside the terminal.",
+    "image": "api/art/archive"
   }
 ];

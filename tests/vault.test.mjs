@@ -1,8 +1,11 @@
 import test from 'node:test';
+import {themes} from '../content/themes.js';
+import {configureScenes} from '../web/core.js';
+configureScenes(themes.filter(t=>t.enabled!==false));
 import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
-import {sealBundle,decryptBundle,normalizePhrase,doorReady,doorPrerequisites,validateRoom,base64ToBytes,bytesToBase64} from '../dist/vault.js';
-import {scenes,fragments,readState,chooseScene} from '../dist/core.js';
+import {sealBundle,decryptBundle,normalizePhrase,doorReady,doorPrerequisites,validateRoom,base64ToBytes,bytesToBase64} from '../web/vault.js';
+import {scenes,fragments,readState,chooseScene} from '../web/core.js';
 test('encrypted bundles need the right phrase, authenticate changes, and use fresh randomness',async()=>{
  const fixture={test:'not production content',image:{base64:'fixture only'}};
  const first=await sealBundle(fixture,['fixture','demo','sample']);
@@ -23,17 +26,17 @@ test('door discovery requires the whole route and never trusts an unlocked flag'
 });
 test('theme definitions remain complete and a single enabled room still works',async()=>{
  assert.equal(new Set(scenes.map(s=>s.id)).size,scenes.length);
- for(const s of scenes){assert.match(s.id,/^[a-z][a-z0-9-]*$/);assert.match(s.accent,/^#[0-9a-f]{6}$/i);assert.equal(s.heading.length,2);assert.ok(s.heading.every(x=>typeof x==='string'));assert.ok(s.note.body);assert.ok(s.signal.body);assert.ok(await readFile(new URL('../dist/'+s.image,import.meta.url)));}
+ for(const s of scenes){assert.match(s.id,/^[a-z][a-z0-9-]*$/);assert.match(s.accent,/^#[0-9a-f]{6}$/i);assert.equal(s.heading.length,2);assert.ok(s.heading.every(x=>typeof x==='string'));assert.ok(s.note.body);assert.ok(s.signal.body);assert.ok(await readFile(new URL('../content/art/'+s.id+'.json',import.meta.url)));}
  assert.equal(chooseScene({last:'only'},()=>.9,[{id:'only'}]),'only');
  assert.throws(()=>chooseScene({},Math.random,[]));
  for(const id of doorPrerequisites)assert.ok(fragments[id],'Keep the clue rooms enabled, or redesign the optional door route.');
  assert.equal(Object.keys(fragments).length,scenes.length*2+1);
 });
 test('production vault contains only an encrypted envelope, not room metadata or artwork',async()=>{
- const bundle=JSON.parse(await readFile(new URL('../dist/vault/door.json',import.meta.url),'utf8'));
+ const bundle=JSON.parse(await readFile(new URL('../web/vault/door.json',import.meta.url),'utf8'));
  assert.deepEqual(Object.keys(bundle).sort(),['ciphertext','format','iterations','iv','kdf','salt'].sort());
  assert.equal(bundle.format,'lh-room-1');assert.ok(bundle.ciphertext.length>1000);
- const assets=await readdir(new URL('../dist/assets/',import.meta.url));
+ const assets=await readdir(new URL('../web/assets/',import.meta.url));
  assert.equal(assets.some(name=>/secret|unlisted|sealed-room|greenhouse/.test(name)),false);
  assert.equal(normalizePhrase([' FiXtUrE ','de-mo','sam ple']),'fixture|demo|sample');
 });

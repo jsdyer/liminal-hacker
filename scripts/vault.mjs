@@ -2,7 +2,7 @@
 // Authoring tool. Keep phrase files and unsealed inputs outside the repository.
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {dirname,resolve,relative} from 'node:path';
-import {sealBundle,decryptBundle,validateRoom} from '../dist/vault.js';
+import {sealBundle,decryptBundle,validateRoom} from '../web/vault.js';
 const [mode,...args]=process.argv.slice(2);
 const flags=Object.fromEntries(args.reduce((a,v,i)=>i%2===0?[...a,[v,args[i+1]]]:a,[]));
 if(!['seal','unseal'].includes(mode)||!flags['--input']||!flags['--output']||!flags['--phrase-file']){

@@ -1,6 +1,9 @@
 import test from 'node:test';
+import {themes} from '../content/themes.js';
+import {configureScenes} from '../web/core.js';
+configureScenes(themes.filter(t=>t.enabled!==false));
 import assert from 'node:assert/strict';
-import {chooseScene,readState,isTuned,signalStrength,scenes,fragments} from '../dist/core.js';
+import {chooseScene,readState,isTuned,signalStrength,scenes,fragments} from '../web/core.js';
 test('fresh arrivals avoid the previous room, but respect a valid lock or direct link',()=>{
  for(const s of scenes)for(const rng of [0,.1,.5,.99])assert.notEqual(chooseScene({last:s.id},()=>rng),s.id);
  assert.equal(chooseScene({last:'atrium',locked:'atrium'}),'atrium');

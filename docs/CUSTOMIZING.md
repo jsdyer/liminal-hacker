@@ -1,17 +1,17 @@
 # Make this place yours
 
-Regular themes are deliberately simple to edit. The site is plain HTML, CSS, and browser JavaScript. No package installation or build is needed to publish it.
+Regular themes are deliberately simple to edit. Their text is in a server-side catalogue; their images are encrypted packets. The browser uses plain HTML, CSS, and JavaScript. A small server enforces discovery. Node 24+ runs the build and optional local SQLite server; no npm dependencies are required.
 
 ## Change or add a theme
 
-Open **`dist/themes.js`**. Each entry contains its name, headline, description, accent colour, image, sound preset, note, and radio transmission. The directory, random arrivals, terminal travel, and fragment totals are derived from this list.
+Open **`content/themes.js`**. Each entry contains its name, headline, description, accent colour, image, sound preset, note, and radio transmission. The server’s location pool and fragment totals are derived from this list. Visitors only receive metadata and artwork for places they have discovered.
 
 1. Copy one theme entry and give it a unique lowercase `id`.
-2. Put a landscape image in `dist/assets/` and set `image` to its relative path. Around 1600 pixels wide, dark on the left with detail on the right, works well. WebP keeps the download small.
+2. Keep a landscape WebP in ignored `private/` or outside the repository. Around 1600 pixels wide, dark on the left with detail on the right, works well. With the existing `ART_KEY` set in ignored `.env`, run `node scripts/art.mjs seal workshop /private/workshop.webp content/art/workshop.json` (replace the ID and path). Only commit the encrypted packet.
 3. Set the two lines in `heading`, the newline-separated `description`, and the hex `accent` colour.
 4. Choose a `sound`: `hum`, `rain`, `fans`, `water`, `drums`, `tunnel`, `vent`, or `pages`.
 5. Write a `note` and a `signal`. Put the frequency in the note so the receiver puzzle is solvable. Choose a distinct frequency from 88.0 through 108.0 with one decimal place.
-6. Preview and run `npm run check` and `npm test`. Upload `dist/` to your host.
+6. Run `npm run check`, `npm test`, and `npm run build`, then preview with `npm start`. Publish the server, not a static upload. See SELF-HOSTING.md.
 
 No HTML count changes or new CSS palette rules are required. The entry below illustrates the shape; replace its writing and image before using it.
 
@@ -24,7 +24,6 @@ No HTML count changes or new CSS palette rules are required. The entry below ill
   time: "03:18",
   accent: "#c8c5a0",
   sound: "fans",
-  image: "assets/workshop.webp",
   subtitle: "One small repair left to make.",
   status: "The soldering iron is cooling.",
   heading: ["A little broken.", "Still worth keeping."],
@@ -44,19 +43,21 @@ No HTML count changes or new CSS palette rules are required. The entry below ill
 
 Hotspots default to a note, radio, and terminal. For precise placement, supply `hotspots` as in the original atrium entry; `x` and `y` are percentages. Inspect the scene on both wide and narrow screens after moving them.
 
-Set `enabled: false` to hide a public theme. Keep at least one enabled. Keep stable IDs to preserve visitors' collected fragments and favourites. The optional door puzzle relies on the library, pool, and platform transmissions, so leave those enabled unless you also revise its route in `dist/vault.js`. The tests catch a broken route.
+Set `enabled: false` to hide a public theme. Keep at least one enabled. Keep stable IDs to preserve visitors' server-owned collections and local fragments. The optional door puzzle relies on the library, pool, and platform transmissions, so leave those enabled unless you also revise its route in `web/vault.js`. The tests catch a broken route. Timing is separately configurable in `config/journey.js`; existing deadlines stay unchanged until the next grant.
 
 ## Other edits
 
 | What you want to change | File |
 | --- | --- |
-| Themes, ordinary fragments, colours, frequencies, pictures | `dist/themes.js` |
-| Longer field-note essays and the tea fragment | `dist/core.js` |
-| Homepage sections and navigation labels | `dist/index.html` |
-| Typography, layout, responsive rules | `dist/style.css` |
-| Terminal commands and interactions | `dist/app.js` |
-| Synthesized ambience | `dist/audio.js` |
-| Encrypted-room mechanism | `dist/vault.js` |
+| Themes, ordinary fragments, colours, frequencies, pictures | `content/themes.js` |
+| Longer field-note essays and the tea fragment | `web/core.js` |
+| Homepage sections and navigation labels | `web/index.html` |
+| Typography, layout, responsive rules | `web/style.css` |
+| Terminal commands and interactions | `web/app.js` |
+| Synthesized ambience | `web/audio.js` |
+| Bonus-room puzzle | `web/vault.js` |
+| Timing and new-room selection | `config/journey.js`, `worker/service.js` |
+| Normal artwork encryption | `worker/art.js`, `scripts/art.mjs` |
 
 ## The encrypted room
 
@@ -68,7 +69,7 @@ Editing the secret room requires opening its bundle first. Keep a phrase file ou
 
 ```sh
 node scripts/vault.mjs unseal \
-  --input dist/vault/door.json \
+  --input web/vault/door.json \
   --output /private/liminal/room.json \
   --phrase-file /private/liminal/phrase.txt
 ```
@@ -78,12 +79,12 @@ Edit the returned JSON outside the repository. It contains `scene` metadata, `le
 ```sh
 node scripts/vault.mjs seal \
   --input /private/liminal/room.json \
-  --output dist/vault/door.json \
+  --output web/vault/door.json \
   --phrase-file /private/liminal/phrase.txt
 ```
 
-Only commit the encrypted `dist/vault/door.json`, never the authoring files. The tool rejects plaintext input/output and phrase paths inside the repository. Losing the phrase means you must solve the riddles or replace the bundle. Changing the phrase requires updating the clues so visitors can derive the new answers.
+Only commit the encrypted `web/vault/door.json`, never the authoring files. The tool rejects plaintext input/output and phrase paths inside the repository. Losing the phrase means you must solve the riddles or replace the bundle. Changing the phrase requires updating the clues so visitors can derive the new answers.
 
-The encrypted door requires **HTTPS or localhost** for Web Crypto. The rest of the site can run over ordinary HTTP. A stronger future version could validate progress and issue decryption keys on your server, but anything a visitor can see can ultimately be copied.
+The encrypted door requires **HTTPS or localhost** for Web Crypto. Use HTTPS for a public deployment; localhost is sufficient for local testing. A stronger future version could validate progress and issue decryption keys on your server, but anything a visitor can see can ultimately be copied.
 
 References: [Web Crypto](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API), [deriveKey](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveKey), [AES-GCM](https://developer.mozilla.org/en-US/docs/Web/API/AesGcmParams).

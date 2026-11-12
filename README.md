@@ -1,58 +1,49 @@
 # Liminal Hacker
 
-**Hacking the in-between, after hours.** An atmospheric personal art site for LiminalHacker.com: empty architecture, quiet systems, and a warm place to stay.
+**Hacking the in-between, after hours.** Nineteen imagined late-night places, an encrypted unlisted room, and a little warmth inside very large empty spaces.
 
-## The experience
+The first arrival is random. Refreshing brings you back to it. A compact horizontal carousel remembers places you have reached; new places remain unnamed and unpictured until a passage opens. Each discovery is selected without replacement. There is no score, streak, daily reset, missed reward, or need to keep the page open.
 
-- Nine cinematic spaces: **The atrium**, **The rooftop relay**, and **The warm machine**, plus a midnight laundromat, last platform, still-water pool, closed concourse, overnight stacks, and motel corridor. Each has original scene artwork, a different palette, writing, sound and discoveries.
-- A random arrival on each load avoids the last visited space. **Stay here** pins a favourite. A direct link such as `?space=rooftop` overrides the arrival choice.
-- **Enter the space** opens an immersive view with keyboard-accessible hotspots. Left/right arrows move between spaces; Escape returns to the site.
-- An imagined local terminal (`~` shortcut) supports `help`, `ls`, `cat note.txt`, `whoami`, `pwd`, `scan`, `tune <MHz>`, `walk <place>`, `map`, `notebook`, `tea`, `clear`, and `exit`. This is a fictional shell, not a command runner or a network scanner.
-- Tune the radio to the frequency written on each room's note. Nine physical notes, nine transmissions, and a small terminal ritual make nineteen fragments.
-- A field notebook stores discoveries and personal notes locally, with JSON export. Local storage is validated and storage failure is surfaced without breaking the site.
-- Optional, locally synthesized Web Audio ambience. No autoplay. Volume control under **Stay awhile**. Audio pauses in a hidden tab. No external music or audio assets.
-- Responsive layouts, visible keyboard focus, semantic buttons, native modal focus management, reduced-motion support, and no jump scares or flashing effects.
+Default pacing: the first passage after 15 minutes, then one new passage every 60–120 minutes. Waiting does not stack several unused passages. The visitor chooses when to go through an available passage, and the next wait begins then. Previously discovered places remain freely revisitable. The old random-on-refresh behaviour has been retired.
 
-## Run and host
+## Change the experience
 
-There is **no build step, dependency, framework, CDN, or backend**. Node is only needed for the optional checks.
+| Change | File |
+| --- | --- |
+| Discovery timing | `config/journey.js` |
+| Location writing, colours, sounds, clues | `content/themes.js` |
+| Encrypted location artwork | `content/art/<id>.json` |
+| Page sections and compact carousel | `web/index.html`, `web/style.css` |
+| Exploration, terminal, notebook, interactions | `web/app.js` |
+| Server-owned discovery and authorization | `worker/service.js` |
+| Artwork encryption | `worker/art.js`, `scripts/art.mjs` |
+
+See [customization](docs/CUSTOMIZING.md), [discovery design](docs/DISCOVERY.md), and [self-hosting](docs/SELF-HOSTING.md).
+
+## What is here
+
+The atrium, rooftop relay, warm machine, midnight wash, last platform, still-water room, closed concourse, overnight stacks, vacancy corridor, ferry crossing, borrowed sky, empty lanes, lower level, hill station, open lab, last screening, suspended passage, roadside light, and sleeping records.
+
+Every location has original artwork, a palette, optional synthesized ambience, a physical note, and a radio transmission. There are 39 ordinary fragments and a separate encrypted bonus room. The local fictional terminal offers `help`, `ls`, `cat note.txt`, `scan`, `tune`, `walk`, `map`, `notebook`, `tea`, and small discoveries. It executes no real commands and makes no real network scans.
+
+## Server and build
+
+The browser remains plain HTML/CSS/JavaScript. The pacing feature now needs a backend; a static upload alone cannot enforce it. No npm dependencies are required. Node 24+ provides the local runtime and SQLite adapter. Production on Sites uses a Worker and D1, with identity supplied by the hosting service.
 
 ```sh
-python3 -m http.server 8080 --directory dist
-```
-
-Open `http://localhost:8080`. Serve over HTTP(S), rather than opening `index.html` as a local file, because the scripts use native JavaScript modules.
-
-To self-host, point Apache/Nginx's document root at `dist/`, or upload the contents of `dist/` to a static host. Set the MIME type for `.js` to JavaScript if your host does not already do so. All paths are relative, so subdirectory hosting works. No rewrites are required. Configure TLS and DNS for `liminalhacker.com` on your chosen host; this repository does not change DNS.
-
-The `.openai/hosting.json` file identifies the separate private preview deployment. It is not needed for your own Apache/Nginx deployment.
-
-```sh
+# Configure .env using .env.example, including the existing artwork key.
 npm run check
 npm test
+npm run build
+npm start
 ```
 
-## Customize
+The build creates a single Worker ES module in ignored `dist/server/index.js`. Its public file allowlist contains only the application shell and encrypted puzzle bundle. Location artwork is encrypted in source and decrypted server-side only for authorized visits. The master artwork key is a runtime secret, absent from Git and the browser. Back it up securely; a fresh random key cannot decrypt existing art.
 
-| File | Purpose |
-| --- | --- |
-| `dist/themes.js` | Editable theme definitions, titles, colours, frequencies, hotspots and fragments |
-| `dist/core.js` | Scene normalization, persistence validation and field-note essays |
-| `dist/style.css` | Responsive layout, typography and room palettes |
-| `dist/app.js` | Exploration, terminal, notebook, radio and navigation |
-| `dist/audio.js` | Procedural sound layers and volume |
-| `dist/assets/*.webp` | Optimized original scene art |
+## Privacy and limits
 
-See **[the customization guide](docs/CUSTOMIZING.md)** for a copyable theme entry, field descriptions, and encrypted-room authoring commands. Counts and navigation update automatically from `dist/themes.js`. The original artwork briefs are in `dist/assets/ARTWORK.md`; additions are in `docs/NEW-ARTWORK.md`.
+Hosted visits are tied to a stable site-specific account identity; the database keeps a hash of that identity, discovered location IDs, current location, next passage time, revision, and record timestamps. It stores no email, IP address, personal notebook text, or advertising identifiers. Anonymous standalone mode uses an opaque HTTP-only cookie whose progress remains on the server; deleting that cookie creates a new visitor. Authenticated identity is needed to prevent that reset. Personal notebook writing and collected fragments remain browser-local and can be exported.
 
-## The unlisted room
+New plaintext artwork is not published in Git or the public asset directory. The original nine images were public in earlier commits and cannot be made secret retroactively. Source readers can see the ordinary catalogue's names, writing, and code; they cannot get the new image bytes or runtime key from it. Screenshots, already-delivered images, account sharing, and multiple accounts remain outside the pacing guarantee. This is gentle discovery, not DRM or a place for sensitive information.
 
-There is also an encrypted bonus room. Follow the transmissions in the new spaces and see what the terminal notices. Its artwork, name, and writing are not shipped as plaintext. AES-256-GCM protects the bundle; the visitor supplies the phrase derived from clues. This keeps the room out of casual image-directory and source browsing, but is deliberately **a puzzle, not a security boundary**. The progress gate is client-side, clues can be solved from source, phrase guesses can be tried offline, and unlocked content can be copied. The customization guide explains the limits without publishing the answer.
-
-Secret-room decryption uses browser Web Crypto and requires HTTPS or localhost. It lasts for the current page session; the decrypted room and phrase are not saved in local storage.
-
-## Privacy and fiction
-
-The art, terminal, transmissions and observations are fictional. Personal notes and discoveries stay in the current browser's local storage; they do not sync across devices and disappear if site data is cleared. Export to retain them. The site has no analytics, application cookies, fonts from third parties, or remote asset requests. Hosting services may retain ordinary access logs.
-
-Audio and images are served/generated locally after the initial asset load. This version does not install a service worker or promise offline availability. The art direction is slow, eerie and cozy: ethical curiosity, repair, and a little ambiguity.
+There are no analytics, externally hosted fonts, music downloads, autoplay, jump scares, or flashing effects. Hosting services can retain ordinary access logs. Artwork is AI-created; all places and transmissions are fictional.

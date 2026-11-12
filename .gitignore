@@ -6,3 +6,8 @@ private/
 *.phrase
 *.unsealed.json
 .env
+
+dist/
+.env.*
+!.env.example
+*.sqlite*

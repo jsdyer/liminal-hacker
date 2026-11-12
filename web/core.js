@@ -1,14 +1,18 @@
-import {themes} from './themes.js';
 export function prepareScene(theme){
  const s={...theme};
  s.hotspots ??= [{x:71,y:52,label:'A note left behind',type:'fragment',fragment:s.id+'-note'},{x:43,y:65,label:'A faint transmission',type:'radio'},{x:82,y:65,label:'The waiting terminal',type:'terminal'}];
  return s;
 }
-export const scenes=themes.filter(s=>s.enabled!==false).map(prepareScene);
-export const fragments=Object.fromEntries(scenes.flatMap(s=>[
- [s.id+'-note',{...s.note,source:s.note.source||s.name.toUpperCase()+' / LEFT BEHIND'}],
- [s.id+'-signal',{...s.signal,source:s.signal.source||s.name.toUpperCase()+' / '+s.frequency.toFixed(1)+' MHz'}]
-]));
+export let scenes=[];
+export let fragments={};
+export function configureScenes(themes){
+ scenes=themes.map(prepareScene);
+ const tea=fragments.tea;
+ fragments=Object.fromEntries(scenes.flatMap(s=>[
+  [s.id+'-note',{...s.note,source:s.note.source||s.name.toUpperCase()+' / LEFT BEHIND'}],
+  [s.id+'-signal',{...s.signal,source:s.signal.source||s.name.toUpperCase()+' / '+s.frequency.toFixed(1)+' MHz'}]
+ ]));if(tea)fragments.tea=tea;
+}
 fragments.tea = {"title": "Permission to stay", "source": "TERMINAL / A SMALL RITUAL", "body": "The kettle clicks off. Nothing needs to happen.\n\nOutside, a city full of sleeping people continues to exist without your supervision. Inside, for a moment, you are not late for anything.\n\nWelcome back, liminal hacker."};
 export const observations=[
  {time:'02:17',title:'The hum is a kind of company.',body:'A server room is never really empty.\n\nThere are fans remembering their speed. Disks keeping a small promise. A UPS holding its breath for a power cut that may never come.\n\nIn the daytime, this is infrastructure. At two in the morning, it feels more like weather.\n\nYou sit down at the terminal and type a command you already know the answer to. Not because anything is broken. Just to hear something answer.\n\nThe hum continues. For now, that is enough.'},
@@ -27,5 +31,5 @@ export function signalStrength(value,target){return Math.max(0,1-Math.abs(Number
 export function isTuned(value,target){return Number.isFinite(Number(value))&&Math.abs(Number(value)-target)<.051;}
 export function readState(raw){
  const empty={version:1,found:[],notes:'',locked:null,last:null};
- try{const d=JSON.parse(raw);if(!d||typeof d!=='object')return empty;return {...empty,found:Array.isArray(d.found)?[...new Set(d.found.filter(x=>Object.hasOwn(fragments,x)))]:[],notes:typeof d.notes==='string'?d.notes.slice(0,20000):'',locked:scenes.some(s=>s.id===d.locked)?d.locked:null,last:scenes.some(s=>s.id===d.last)?d.last:null};}catch{return empty;}
+ try{const d=JSON.parse(raw);if(!d||typeof d!=='object')return empty;return {...empty,found:Array.isArray(d.found)?[...new Set(d.found.filter(x=>typeof x==='string'&&(x==='tea'||/^[a-z][a-z0-9-]{0,40}-(note|signal)$/.test(x))).slice(0,200))]:[],notes:typeof d.notes==='string'?d.notes.slice(0,20000):'',locked:scenes.some(s=>s.id===d.locked)?d.locked:null,last:scenes.some(s=>s.id===d.last)?d.last:null};}catch{return empty;}
 }
