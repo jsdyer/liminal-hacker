@@ -1,3 +1,4 @@
+import {journalPublic} from './journal.js';
 import {decryptArt,fromBase64} from './art.js';
 import {createDesk,readWorld,availableRooms,chooseWeighted,imagePacket,recordActivity} from './control.js';
 import {adminActor} from './admin-auth.js';
@@ -53,6 +54,9 @@ export function createService({themes,art,files,config,clock=Date.now,random=()=
   }
   return {async fetch(request,env){
     const url=new URL(request.url),path=url.pathname;
+    if(path==='/journal'||path.startsWith('/journal/')||path.startsWith('/media/photos/')||path==='/api/journal/recent'){
+      try{if(!env.DB)return new Response('The journal is resting. Please return shortly.',{status:503});const db=env.DB.withSession?env.DB.withSession('first-primary'):env.DB;return await journalPublic(request,env,db,!!await adminActor(request,env,clock()));}catch(error){console.error('Journal request failed:',error.name);return new Response('The journal is resting. Please return shortly.',{status:503,headers:PRIVATE});}
+    }
     if(path==='/admin'||path==='/admin/')return new Response(fromBase64(files['/admin/index.html'].body),{headers:{...PRIVATE,'Content-Type':'text/html; charset=utf-8'}});
     if(!path.startsWith('/api/')){
       if(!['GET','HEAD'].includes(request.method))return json({error:'Method not allowed.'},405);

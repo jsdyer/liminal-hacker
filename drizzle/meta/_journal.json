@@ -15,6 +15,13 @@
       "when": 1794488400000,
       "tag": "0001_night_desk",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794528000000,
+      "tag": "0002_journal",
+      "breakpoints": true
     }
   ]
 }

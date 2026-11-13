@@ -2,6 +2,8 @@
 
 Open `/admin`. The hosted desk is restricted to operator emails in the runtime `ADMIN_EMAILS` allowlist, using trusted Sites identity. The current owner is configured in the hosting environment, not in source. Being able to visit the website does not grant operator access. The visitor footer shows a Night desk link only to operators.
 
+The desk also includes **My journal** and **My photographs** for your personal publishing. See [the journal guide](JOURNAL.md) for posts, photo essays, background reuse and backup details.
+
 ## A normal shift
 
 1. **Night overview:** see remembered journeys, collection depth, location reach and daily first-arrival/discovery/revisit counters. These are aggregates, not a live-people counter. Existing journeys contribute to collection totals; activity counters begin with this update. Daily counts use UTC and are best effort, not an accounting ledger.

@@ -10,6 +10,10 @@ Default pacing: the first passage after 15 minutes, then one new passage every 6
 
 Open `/admin` for a purpose-built operator workspace: aggregate discovery statistics, location editing and encrypted image uploads, rarity and release schedules, a pacing simulator, quiet timed transmissions, a discovery pause switch, clue-route/image health checks, private shift notes, draft publication and recoverable history. See [the operating guide](docs/ADMIN.md). Hosted operator access is restricted by the runtime owner email allowlist.
 
+## Personal journal and photographs
+
+Write your own posts at `/admin#journal`, manage your photo library at `/admin#photos`, and share published entries at `/journal`. The editor supports private drafts, formatted notes, cover images, ordered photo essays, tags, permanent URLs, withdrawal and reversible archiving. The archive has search and an RSS feed; the home page shows recent entries. Uploaded photos can also become discovery-protected location backgrounds. See [the journal guide](docs/JOURNAL.md).
+
 ## Change the experience
 
 | Change | File |

@@ -13,7 +13,7 @@
   <div class="environment" aria-hidden="true"><div class="scene-image" id="scene-image"></div><div class="shade"></div><div class="grain"></div></div>
   <header class="site-header">
     <a class="brand" href="./" aria-label="Liminal Hacker home"><svg viewBox="0 0 32 36" fill="none" aria-hidden="true"><path d="M5 31V5h20v26M12 31V12h13M2 31h28" stroke="currentColor" stroke-width="1.6"/><path d="M12 31h13V12" fill="currentColor" opacity=".12"/></svg><span>liminal<span class="brand-light">hacker</span><span class="cursor">_</span></span></a>
-    <nav aria-label="Main navigation"><a href="#spaces" class="active">The spaces</a><a href="#field-notes">Field notes</a><button class="nav-terminal" data-open="terminal"><span aria-hidden="true">&gt;_</span> Terminal</button></nav>
+    <nav aria-label="Main navigation"><a href="#spaces" class="active">The spaces</a><a href="/journal">Journal</a><a href="#field-notes">Field notes</a><button class="nav-terminal" data-open="terminal"><span aria-hidden="true">&gt;_</span> Terminal</button></nav>
     <button id="sound-toggle" class="sound-toggle" aria-pressed="false"><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="sound-label">Sound off</span></button>
   </header>
   <main id="main">
@@ -35,6 +35,7 @@
       <div class="journey-footer"><div><p id="journey-count" class="mono"></p><p id="journey-status" role="status">Listening for a place…</p></div><button class="passage-button mono" id="drift" disabled>The building is quiet</button></div>
       <div class="spaces-footer mono"><span>OLD PLACES KEEP THEIR DOORS OPEN. NEW ONES TAKE THEIR TIME.</span><button class="text-button" data-open="map">Your remembered places →</button></div>
     </section>
+    <section class="personal-journal" aria-labelledby="personal-journal-heading"><div><span class="mono section-number">FROM MY SIDE OF THE SCREEN</span><h2 id="personal-journal-heading">A few things<br><em>worth keeping.</em></h2><p>Personal photographs, late-night notes, projects and discoveries.</p><a class="text-button" href="/journal">Open the journal →</a></div><div id="latest-entries"><p class="journal-quiet">A place for the things that don’t fit in a status update.</p></div></section>
     <section class="notes-section" id="field-notes" aria-labelledby="notes-heading">
       <div class="notes-intro"><span class="section-number mono">02 / THINGS LEFT BEHIND</span><h2 id="notes-heading">Notes from<br><em>the other side.</em></h2><p>Small observations from places that are empty, but never quite silent.</p><button class="text-button" data-open="notebook">Your field notebook <span class="count" id="fragment-count">—</span> →</button></div>
       <div class="journal-list">
@@ -51,6 +52,6 @@
   <div id="toast" class="toast mono" role="status"></div>
   <div id="connection-note" class="connection-note" role="status"><p id="connection-message">Listening for your arrival…</p><button id="retry-journey">Listen again</button><a id="connection-signin" hidden target="_top">Sign in to return</a></div>
   <noscript><p class="noscript">This place is quiet without JavaScript. Enable it to wander between spaces, find fragments, and open the terminal.</p></noscript>
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js"></script><script type="module" src="journal-home.js"></script>
 </body>
 </html>

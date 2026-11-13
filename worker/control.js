@@ -1,3 +1,4 @@
+import {journalAdmin,photoBytes} from './journal.js';
 import {encryptArt,decryptArt,fromBase64} from './art.js';
 import {adminActor,operatorLogin} from './admin-auth.js';
 const DESK_HEADERS={'Cache-Control':'private, no-store','Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff'};
@@ -67,7 +68,7 @@ export function createDesk({themes,art,config,files,clock}){
    if(!request.headers.get('content-type')?.startsWith('application/json'))return deskJSON({error:'Expected JSON.'},415);
    if(Number(request.headers.get('content-length')||0)>900000)return deskJSON({error:'Request too large.'},413);
    const raw=await request.text();if(raw.length>900000)return deskJSON({error:'Request too large.'},413);
-   try{body=JSON.parse(raw);}catch{return deskJSON({error:'Invalid JSON.'},400);}
+   try{body=JSON.parse(raw);if(!body||typeof body!=='object'||Array.isArray(body))throw Error();}catch{return deskJSON({error:'Invalid JSON.'},400);}
    if(path==='/api/admin/login'){
     const cookie=await operatorLogin(request,env,body?.token,now);return cookie?deskJSON({ok:true},200,{'Set-Cookie':cookie}):deskJSON({error:'The access key was not accepted.'},401);
    }
@@ -75,6 +76,7 @@ export function createDesk({themes,art,config,files,clock}){
   if(!actor)return deskJSON({error:'This desk is restricted to its operators.'},403);
   if(request.method==='POST'&&path==='/api/admin/logout')return deskJSON({ok:true},200,{'Set-Cookie':'lh_operator=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0'});
   if(!db)return deskJSON({error:'Database unavailable.'},503);
+  if(/^\/api\/admin\/(photos|photo-upload|photo-metadata|posts|post-save|post-preview|post-publish|post-unpublish|post-archive|post-restore|journal-export)$/.test(path))return journalAdmin(path,body,request,env,db,actor,now);
   const state=await readWorld(db,themes,config);
   if(request.method==='GET'&&path==='/api/admin/state')return deskJSON({...state,warnings:worldWarnings(state.draft,now)});
   if(request.method==='GET'&&path==='/api/admin/stats'){
@@ -123,7 +125,7 @@ export function createDesk({themes,art,config,files,clock}){
   if(path==='/api/admin/artwork'){
    if(!env.BUCKET)return deskJSON({error:'Artwork storage is not configured.'},503);
    const room=draft.rooms.find(s=>s.id===body.id);if(!room)return deskJSON({error:'Save the location draft first.'},400);
-   let bytes;try{bytes=fromBase64(body.base64);}catch{return deskJSON({error:'Invalid image data.'},400);}
+   let bytes;try{bytes=body.photoId?await photoBytes(db,env,body.photoId):fromBase64(body.base64);}catch{return deskJSON({error:'Invalid image data.'},400);}
    if(bytes.length>512000||bytes.length<16||new TextDecoder().decode(bytes.slice(0,4))!=='RIFF'||new TextDecoder().decode(bytes.slice(8,12))!=='WEBP')return deskJSON({error:'Use a WebP image under 500 KB.'},400);
    const ref='art/'+crypto.randomUUID()+'.json',packet=await encryptArt(bytes,room.id,env.ART_KEY);
    await env.BUCKET.put(ref,JSON.stringify(packet),{httpMetadata:{contentType:'application/json'}});room.artRef=ref;action='artwork';detail='Replaced draft artwork for '+room.id;

@@ -1,0 +1,4 @@
+const container=document.getElementById('latest-entries');
+try{
+ const response=await fetch('/api/journal/recent');if(response.ok){const {posts}=await response.json();if(posts.length){container.replaceChildren();for(const p of posts){const entry=document.createElement('a');entry.href='/journal/'+p.slug;entry.className='home-entry';if(p.coverId){const image=document.createElement('img');image.src='/media/photos/'+p.coverId+'.webp';image.alt='';image.loading='lazy';entry.append(image);}const copy=document.createElement('div'),date=document.createElement('span'),title=document.createElement('h3'),excerpt=document.createElement('p');date.className='mono';date.textContent=p.date;title.textContent=p.title+' →';excerpt.textContent=p.excerpt;copy.append(date,title,excerpt);entry.append(copy);container.append(entry);}}}
+}catch{/* The journal link remains usable if the preview cannot load. */}
