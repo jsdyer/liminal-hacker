@@ -1,6 +1,6 @@
 import {journalPublic} from './journal.js';
-import {decryptArt,fromBase64} from './art.js';
-import {createDesk,readWorld,availableRooms,chooseWeighted,imagePacket,recordActivity} from './control.js';
+import {fromBase64} from './art.js';
+import {createDesk,readWorld,availableRooms,chooseWeighted,roomArtwork,recordActivity} from './control.js';
 import {adminActor} from './admin-auth.js';
 
 const PRIVATE={'Cache-Control':'private, no-store','Vary':'Cookie, oai-authenticated-user-id','X-Content-Type-Options':'nosniff'};
@@ -71,13 +71,18 @@ export function createService({themes,art,files,config,clock=Date.now,random=()=
       const extra=who.cookie?{'Set-Cookie':who.cookie}:{};
       // Always route state reads to D1's primary. A stale replica must not issue passages.
       const db=env.DB.withSession?env.DB.withSession('first-primary'):env.DB;
-      const world=(await readWorld(db,themes,config)).live,enabled=availableRooms(world,clock()),byId=new Map(world.rooms.map(s=>[s.id,s]));
+      const world=(await readWorld(db,themes,config)).live;
+      if(!env.ARCHIVE_ART_KEY){
+        // Standalone deployments can keep serving their original rotation until the new key is set.
+        world.rooms=world.rooms.map(room=>!room.artRef&&art[room.id]?.key==='archive'?{...room,enabled:false}:room);
+      }
+      const enabled=availableRooms(world,clock()),byId=new Map(world.rooms.map(s=>[s.id,s]));
       const isAdmin=!!await adminActor(request,env,clock());
       if(request.method==='GET'&&path==='/api/journey')return json(view(await ensure(db,who.key,world),who.mode,world,isAdmin),200,extra);
       if(request.method==='GET'&&path.startsWith('/api/art/')){
         const id=path.slice('/api/art/'.length),row=await load(db,who.key);
         if(!byId.has(id)||!row||!JSON.parse(row.visited).includes(id))return json({error:'You have not reached this place.'},404,extra);
-        const bytes=await decryptArt(await imagePacket(byId.get(id),env,art),id,env.ART_KEY);
+        const bytes=await roomArtwork(byId.get(id),env,art);
         return new Response(bytes,{headers:{...PRIVATE,...extra,'Content-Type':'image/webp'}});
       }
       if(request.method!=='POST'||!['/api/discover','/api/visit'].includes(path))return json({error:'Unknown passage.'},404,extra);

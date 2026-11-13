@@ -9,6 +9,7 @@ Server-controlled discovery changes the hosting requirement. Serve the Node app 
 1. Clone the repository. There are no npm dependencies to install.
 2. Copy `.env.example` to ignored `.env`.
 3. Set `ART_KEY` to the existing deployment's 32-byte base64 artwork key. The authoring checkout has it in ignored `.env`; the private preview has it in runtime secrets. Preserve it securely outside Git. A replacement key requires re-encrypting all original images.
+   Set `ARCHIVE_ART_KEY` to the separate 32-byte base64 key for the eight archive backgrounds. Packets marked with `"key":"archive"` use it and enter rotation once the key is configured. To reseal a scene under your own `ART_KEY`, run the normal artwork sealing command on its WebP. Admin artwork uploads also use `ART_KEY`.
 4. Set `HOST=127.0.0.1`, choose `PORT`, and choose identity mode below. Keep the Node port reachable only from the local reverse proxy in production.
 5. Run `npm run check && npm test && npm run build && npm start`.
 6. Reverse proxy the entire site, including `/api/`, to the Node process. Preserve the public `Host` and `Origin`; terminate HTTPS at the proxy and set `PUBLIC_ORIGIN=https://liminalhacker.com` (your actual origin). This also marks anonymous cookies Secure. Do not cache `/api/` responses. Configure your process supervisor to restart `npm start`.

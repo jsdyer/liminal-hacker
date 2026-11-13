@@ -4,11 +4,24 @@ import {adminActor,operatorLogin} from './admin-auth.js';
 const DESK_HEADERS={'Cache-Control':'private, no-store','Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff'};
 function deskJSON(data,status=200,extra={}){return new Response(JSON.stringify(data),{status,headers:{...DESK_HEADERS,...extra}});}
 export function baseWorld(themes,config){return {settings:{...config,paused:false,pauseMessage:'The building is resting. Familiar doors are still open.'},broadcast:{text:'',expiresAt:null},rooms:themes.map(s=>({...s,weight:1,releaseAt:null,retireAt:null}))};}
+function includeNewRooms(world,seedRooms){
+ const ids=new Set(world.rooms.map(room=>room.id));
+ const frequencies=new Set(world.rooms.map(room=>room.frequency));
+ for(const seed of seedRooms){
+  if(ids.has(seed.id))continue;
+  let frequency=seed.frequency;
+  for(let channel=1080;frequencies.has(frequency);channel--)frequency=channel/10;
+  const note={...seed.note,body:seed.note.body.replace(seed.frequency.toFixed(1),frequency.toFixed(1))};
+  world.rooms.push({...seed,frequency,note});
+  frequencies.add(frequency);
+ }
+ return world;
+}
 export function availableRooms(world,now){return world.rooms.filter(s=>s.enabled!==false&&(!s.releaseAt||s.releaseAt<=now)&&(!s.retireAt||s.retireAt>now));}
 export function chooseWeighted(rooms,random){let n=random()*rooms.reduce((sum,s)=>sum+(s.weight||1),0);for(const s of rooms){n-=s.weight||1;if(n<0)return s;}return rooms.at(-1);}
 export function validateWorld(world,art,now,{allowMissingArt=false}={}){
  const errors=[];const text=(v,max)=>typeof v==='string'&&v.length>0&&v.length<=max;
- if(!world||typeof world!=='object'||!Array.isArray(world.rooms)||world.rooms.length<1||world.rooms.length>80)return ['Keep between 1 and 80 locations.'];
+ if(!world||typeof world!=='object'||!Array.isArray(world.rooms)||world.rooms.length<1||world.rooms.length>88)return ['Keep between 1 and 88 locations.'];
  const c=world.settings;
  if(!c||!Number.isFinite(c.firstWaitMinutes)||c.firstWaitMinutes<1||c.firstWaitMinutes>10080||!Number.isFinite(c.waitMinutes)||c.waitMinutes<1||c.waitMinutes>10080||!Number.isFinite(c.jitterMinutes)||c.jitterMinutes<0||c.jitterMinutes>=c.waitMinutes||typeof c.paused!=='boolean'||!text(c.pauseMessage,200))errors.push('Check timing: 1–10080 minutes, with variation smaller than the normal wait.');
  if(!world.broadcast||typeof world.broadcast.text!=='string'||world.broadcast.text.length>240||(world.broadcast.expiresAt!==null&&(!Number.isFinite(world.broadcast.expiresAt)||world.broadcast.expiresAt<0)))errors.push('The transmission needs at most 240 characters and a valid expiry.');
@@ -25,7 +38,7 @@ export function validateWorld(world,art,now,{allowMissingArt=false}={}){
   if(room.artRef&&!/^art\/[a-f0-9-]{36}\.json$/.test(room.artRef))errors.push(room.id+': invalid artwork reference.');
   if(!allowMissingArt&&!room.artRef&&!art[room.id])errors.push(room.id+': add artwork before publishing.');
   // Hotspots are authored data, but still constrained before any HTML rendering.
-  if((!Array.isArray(room.hotspots)||room.hotspots.length>8||room.hotspots.some(h=>!h||!['fragment','radio','terminal'].includes(h.type)||!text(h.label,80)||/[<>]/.test(h.label)||!Number.isFinite(h.x)||h.x<0||h.x>100||!Number.isFinite(h.y)||h.y<0||h.y>100||(h.type==='fragment'&&h.fragment!==room.id+'-note'))))errors.push(room.id+': invalid hotspot.');
+  if(room.hotspots!==undefined&&(!Array.isArray(room.hotspots)||room.hotspots.length>8||room.hotspots.some(h=>!h||!['fragment','radio','terminal'].includes(h.type)||!text(h.label,80)||/[<>]/.test(h.label)||!Number.isFinite(h.x)||h.x<0||h.x>100||!Number.isFinite(h.y)||h.y<0||h.y>100||(h.type==='fragment'&&h.fragment!==room.id+'-note'))))errors.push(room.id+': invalid hotspot.');
  }
  if(!world.rooms.some(r=>r?.enabled&&!r.retireAt&&(!r.releaseAt||r.releaseAt<=now)))errors.push('Keep at least one location available now without a retirement date.');
  return [...new Set(errors)];
@@ -41,12 +54,20 @@ export async function readWorld(db,themes,config){
  const row=await db.prepare('SELECT * FROM control_state WHERE id=1').bind().first();
  const initial=baseWorld(themes,config);
  if(!row)return {revision:0,draft:initial,live:structuredClone(initial),updatedAt:null,publishedAt:null};
- return {revision:row.revision,draft:JSON.parse(row.draft_json),live:JSON.parse(row.live_json),updatedAt:row.updated_at,publishedAt:row.published_at};
+ const archiveRooms=initial.rooms.filter(room=>room.seedOnUpgrade);
+ const draft=includeNewRooms(JSON.parse(row.draft_json),archiveRooms);
+ const live=includeNewRooms(JSON.parse(row.live_json),archiveRooms);
+ return {revision:row.revision,draft,live,updatedAt:row.updated_at,publishedAt:row.published_at};
 }
 export async function imagePacket(room,env,art){
  if(!room.artRef)return art[room.id];
  const object=await env.BUCKET?.get(room.artRef);if(!object)throw new Error('Artwork unavailable.');
  return JSON.parse(await object.text());
+}
+export async function roomArtwork(room,env,art){
+ const packet=await imagePacket(room,env,art);
+ const key=!room.artRef&&packet?.key==='archive' ? env.ARCHIVE_ART_KEY : env.ART_KEY;
+ return decryptArt(packet,room.id,key);
 }
 export async function recordActivity(db,room,kind,now){
  const columns=['arrivals','discoveries','revisits'];if(!columns.includes(kind))return;
@@ -95,10 +116,10 @@ export function createDesk({themes,art,config,files,clock}){
   if(request.method==='GET'&&path==='/api/admin/art'){
    const world=url.searchParams.get('view')==='live'?state.live:state.draft,room=world.rooms.find(s=>s.id===url.searchParams.get('id'));
    if(!room)return deskJSON({error:'Unknown location.'},404);
-   try{return new Response(await decryptArt(await imagePacket(room,env,art),room.id,env.ART_KEY),{headers:{...DESK_HEADERS,'Content-Type':'image/webp'}});}catch{return deskJSON({error:'Artwork could not be opened.'},503);}
+   try{return new Response(await roomArtwork(room,env,art),{headers:{...DESK_HEADERS,'Content-Type':'image/webp'}});}catch{return deskJSON({error:'Artwork could not be opened.'},503);}
   }
   if(request.method==='GET'&&path==='/api/admin/health'){
-   const artwork=[];for(const room of state.live.rooms){try{await decryptArt(await imagePacket(room,env,art),room.id,env.ART_KEY);artwork.push({id:room.id,ok:true});}catch{artwork.push({id:room.id,ok:false});}}
+   const artwork=[];for(const room of state.live.rooms){try{await roomArtwork(room,env,art);artwork.push({id:room.id,ok:true});}catch{artwork.push({id:room.id,ok:false});}}
    let puzzle=false;try{const b=JSON.parse(new TextDecoder().decode(fromBase64(files['/vault/door.json'].body)));puzzle=b.format==='lh-room-1'&&b.iterations===600000&&b.ciphertext.length>1000;}catch{}
    return deskJSON({database:true,artwork,puzzleEnvelope:puzzle,uploadStorage:!!env.BUCKET,operatorAccess:true,warnings:worldWarnings(state.live,now),checkedAt:now});
   }
@@ -132,7 +153,7 @@ export function createDesk({themes,art,config,files,clock}){
   }
   if(path==='/api/admin/publish'){
    const errors=validateWorld(draft,art,now);if(errors.length)return deskJSON({error:errors.join(' '),errors},400);
-   for(const room of draft.rooms){try{await decryptArt(await imagePacket(room,env,art),room.id,env.ART_KEY);}catch{return deskJSON({error:'Check artwork for '+room.id+' before publishing.'},400);}}
+   for(const room of draft.rooms){try{await roomArtwork(room,env,art);}catch{return deskJSON({error:'Check artwork for '+room.id+' before publishing.'},400);}}
    action='publish';detail='Published locations, timing and the night transmission';
   }
   // Never allow deleting an existing room from history; retiring it is reversible.

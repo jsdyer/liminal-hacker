@@ -581,5 +581,397 @@ export const themes = [
     "enabled": true,
     "hint": "There is something left beside the terminal.",
     "image": "api/art/archive"
+  },
+  {
+    "id": "basement-archive",
+    "name": "The basement archive",
+    "level": "LOWER GROUND / RESEARCH",
+    "time": "02:08",
+    "accent": "#d5bf9e",
+    "sound": "hum",
+    "frequency": 92.1,
+    "heading": [
+      "The files came in.",
+      "The lamp stayed on."
+    ],
+    "subtitle": "A place to read what came back.",
+    "status": "Two versions of the same page are on the desk.",
+    "description": "A scanner, a mug, and two pages under a lamp.\nThe concrete stays cold. The desk is warm.\nSomething in the second copy catches your eye.",
+    "hint": "There is a pencilled note beside the stack of releases.",
+    "note": {
+      "title": "Keep both copies",
+      "body": "The receiver is set to 92.1.\n\nThe two copies have the same date. One has a sentence the other one is missing. Keep both, and mark the page numbers before you make another cup."
+    },
+    "signal": {
+      "title": "A second look",
+      "body": "I used to read these from the first page to the last. Now I start with the places where the pages disagree. The same paragraph can look different at two in the morning."
+    },
+    "enabled": true,
+    "seedOnUpgrade": true,
+    "image": "api/art/basement-archive",
+    "hotspots": [
+      {
+        "x": 74,
+        "y": 45,
+        "label": "A pencilled comparison",
+        "type": "fragment",
+        "fragment": "basement-archive-note"
+      },
+      {
+        "x": 49,
+        "y": 31,
+        "label": "A signal from the shelves",
+        "type": "radio"
+      },
+      {
+        "x": 88,
+        "y": 55,
+        "label": "The research terminal",
+        "type": "terminal"
+      }
+    ]
+  },
+  {
+    "id": "closed-stacks",
+    "name": "The closed stacks",
+    "level": "LOWER GROUND / STACKS",
+    "time": "01:37",
+    "accent": "#b3c9a6",
+    "sound": "vent",
+    "frequency": 96.2,
+    "heading": [
+      "An aisle opens.",
+      "The shelves go on."
+    ],
+    "subtitle": "A cart left halfway through a retrieval.",
+    "status": "One handwheel has been turned.",
+    "description": "Rows of boxes slide together on steel tracks.\nOne aisle is still open. One box is already on the cart.\nThe stairs behind you are warmer than the room.",
+    "hint": "Check the slip on the waiting cart.",
+    "note": {
+      "title": "Retrieval slip",
+      "body": "The receiver on the shelf reads 96.2.\n\nSeries B, box 14. Return the folder to its original position. The photograph at the back belongs with the letter."
+    },
+    "signal": {
+      "title": "The order of things",
+      "body": "The files tell you what was kept. The order tells you who had to find it again. Some of these boxes have travelled through more offices than I have."
+    },
+    "enabled": true,
+    "seedOnUpgrade": true,
+    "image": "api/art/closed-stacks",
+    "hotspots": [
+      {
+        "x": 62,
+        "y": 57,
+        "label": "The retrieval slip",
+        "type": "fragment",
+        "fragment": "closed-stacks-note"
+      },
+      {
+        "x": 74,
+        "y": 32,
+        "label": "A carrier down the aisle",
+        "type": "radio"
+      },
+      {
+        "x": 83,
+        "y": 64,
+        "label": "The stacks terminal",
+        "type": "terminal"
+      }
+    ]
+  },
+  {
+    "id": "redaction-desk",
+    "name": "The redaction desk",
+    "level": "RECORDS OFFICE / REVIEW",
+    "time": "02:43",
+    "accent": "#dcc3a3",
+    "sound": "hum",
+    "frequency": 98.3,
+    "heading": [
+      "The page is here.",
+      "Some words are gone."
+    ],
+    "subtitle": "A file paused between review and release.",
+    "status": "The scanner has gone back to sleep.",
+    "description": "A lamp, a date stamp, and a page with two black bars.\nThrough the ribbed glass, the rest of the office is dark.\nThere is enough left on the page to keep reading.",
+    "hint": "Look for the note clipped to the release.",
+    "note": {
+      "title": "Review copy",
+      "body": "Tune the receiver to 98.3.\n\nThe cover letter lists the grounds for withholding. Check which pages each one applies to. The attachment starts on page six."
+    },
+    "signal": {
+      "title": "The surviving lines",
+      "body": "Sometimes the useful thing is a date or an innocuous line in a covering email. Read what is there. Leave a little room for what you still have to ask."
+    },
+    "enabled": true,
+    "seedOnUpgrade": true,
+    "image": "api/art/redaction-desk",
+    "hotspots": [
+      {
+        "x": 69,
+        "y": 68,
+        "label": "The clipped review copy",
+        "type": "fragment",
+        "fragment": "redaction-desk-note"
+      },
+      {
+        "x": 45,
+        "y": 38,
+        "label": "A signal behind the glass",
+        "type": "radio"
+      },
+      {
+        "x": 62,
+        "y": 48,
+        "label": "The review terminal",
+        "type": "terminal"
+      }
+    ]
+  },
+  {
+    "id": "microfilm",
+    "name": "Microfilm after midnight",
+    "level": "LIBRARY / MICROFORMS",
+    "time": "00:52",
+    "accent": "#b6ceda",
+    "sound": "pages",
+    "frequency": 99.8,
+    "heading": [
+      "A little light.",
+      "A whole day comes back."
+    ],
+    "subtitle": "The last reader is still on.",
+    "status": "A reel is waiting to be rewound.",
+    "description": "Beige readers stand along the oak counter.\nOne screen is still showing yesterday from a long time ago.\nThe card catalogue is just visible in the reflection.",
+    "hint": "The reel box has a handwritten index card.",
+    "note": {
+      "title": "One frame further",
+      "body": "The alcove receiver is set to 99.8.\n\nThe article continues on the next reel. The frame after it shows the building before anyone put the new entrance in."
+    },
+    "signal": {
+      "title": "The other column",
+      "body": "I came for a council decision and stayed for the notices in the column beside it. Someone was selling a radio. Someone wanted a ride west. For a moment it was their evening again."
+    },
+    "enabled": true,
+    "seedOnUpgrade": true,
+    "image": "api/art/microfilm",
+    "hotspots": [
+      {
+        "x": 72,
+        "y": 56,
+        "label": "The index card",
+        "type": "fragment",
+        "fragment": "microfilm-note"
+      },
+      {
+        "x": 57,
+        "y": 33,
+        "label": "A frequency in the alcove",
+        "type": "radio"
+      },
+      {
+        "x": 85,
+        "y": 43,
+        "label": "The glowing reader",
+        "type": "terminal"
+      }
+    ]
+  },
+  {
+    "id": "archive-reading-room",
+    "name": "The reading room",
+    "level": "PUBLIC ARCHIVE / READING ROOM",
+    "time": "03:24",
+    "accent": "#bac9a7",
+    "sound": "rain",
+    "frequency": 102.6,
+    "heading": [
+      "A box on the table.",
+      "The rain can wait."
+    ],
+    "subtitle": "One lamp in a room built for dozens.",
+    "status": "A request slip marks your place.",
+    "description": "Rain gathers on the tall windows.\nA green lamp lights a request slip and a grey box.\nThe far end of the room is almost out of sight.",
+    "hint": "A request slip sits just under the lamp.",
+    "note": {
+      "title": "Table by the window",
+      "body": "The desk receiver is tuned to 102.6.\n\nRequest the next folder under the previous department name. The catalogue still has it filed there."
+    },
+    "signal": {
+      "title": "The older name",
+      "body": "Departments change names faster than the boxes do. Try the one in the letterhead. That was how I found the rest of the file."
+    },
+    "enabled": true,
+    "seedOnUpgrade": true,
+    "image": "api/art/archive-reading-room",
+    "hotspots": [
+      {
+        "x": 74,
+        "y": 71,
+        "label": "The request slip",
+        "type": "fragment",
+        "fragment": "archive-reading-room-note"
+      },
+      {
+        "x": 54,
+        "y": 48,
+        "label": "A quiet receiver",
+        "type": "radio"
+      },
+      {
+        "x": 62,
+        "y": 59,
+        "label": "The catalogue terminal",
+        "type": "terminal"
+      }
+    ]
+  },
+  {
+    "id": "museum-storage",
+    "name": "Below the museum",
+    "level": "COLLECTIONS / SERVICE LEVEL",
+    "time": "02:29",
+    "accent": "#b7cbcd",
+    "sound": "vent",
+    "frequency": 105.3,
+    "heading": [
+      "The gallery closed.",
+      "The collection stayed."
+    ],
+    "subtitle": "A row of quiet cages beneath the galleries.",
+    "status": "One crate is under a work light.",
+    "description": "Wrapped frames and a crated object wait behind wire mesh.\nThe service corridor runs on past the last light.\nEach shelf has a place in the inventory.",
+    "hint": "A condition report rests by the open cage.",
+    "note": {
+      "title": "Condition on arrival",
+      "body": "The workroom radio is set to 105.3.\n\nThe crate arrived with two labels. Photograph them both before replacing the protective wrap."
+    },
+    "signal": {
+      "title": "The reverse of the frame",
+      "body": "The public label is upstairs. Down here, the back of the frame still has the freight label, an old inventory number, and a repair dated in pencil."
+    },
+    "enabled": true,
+    "seedOnUpgrade": true,
+    "image": "api/art/museum-storage",
+    "hotspots": [
+      {
+        "x": 79,
+        "y": 61,
+        "label": "The condition report",
+        "type": "fragment",
+        "fragment": "museum-storage-note"
+      },
+      {
+        "x": 50,
+        "y": 39,
+        "label": "A carrier in the corridor",
+        "type": "radio"
+      },
+      {
+        "x": 74,
+        "y": 38,
+        "label": "The collection terminal",
+        "type": "terminal"
+      }
+    ]
+  },
+  {
+    "id": "last-gallery",
+    "name": "The last gallery",
+    "level": "UPPER GALLERY / WORKS ON PAPER",
+    "time": "01:16",
+    "accent": "#c5c1dc",
+    "sound": "hum",
+    "frequency": 106.1,
+    "heading": [
+      "One case still lit.",
+      "One page still open."
+    ],
+    "subtitle": "A document under glass after closing.",
+    "status": "The far doors are holding a little blue light.",
+    "description": "The paintings barely lift out of the dark.\nAt the end of the room, a single folder is open under glass.\nTomorrow the floor will fill with footsteps again.",
+    "hint": "Someone left a caption draft beside the case.",
+    "note": {
+      "title": "Caption draft",
+      "body": "The gallery receiver is tuned to 106.1.\n\nThe folder is open to page three. Its cover has three filing numbers crossed out. Leave room on the label for the one that stuck."
+    },
+    "signal": {
+      "title": "In the display case",
+      "body": "All week the paper was handled with gloves. This morning someone leaned over the glass and recognized the address. Their family had lived two doors down."
+    },
+    "enabled": true,
+    "seedOnUpgrade": true,
+    "image": "api/art/last-gallery",
+    "hotspots": [
+      {
+        "x": 80,
+        "y": 60,
+        "label": "The caption draft",
+        "type": "fragment",
+        "fragment": "last-gallery-note"
+      },
+      {
+        "x": 61,
+        "y": 38,
+        "label": "A signal by the far doors",
+        "type": "radio"
+      },
+      {
+        "x": 72,
+        "y": 48,
+        "label": "The exhibit terminal",
+        "type": "terminal"
+      }
+    ]
+  },
+  {
+    "id": "release-envelope",
+    "name": "The release envelope",
+    "level": "MUNICIPAL RECORDS / PICKUP",
+    "time": "00:39",
+    "accent": "#d7bd9a",
+    "sound": "rain",
+    "frequency": 107.1,
+    "heading": [
+      "The counter is empty.",
+      "Your envelope is here."
+    ],
+    "subtitle": "A reply on the public side of the glass.",
+    "status": "The clerk’s lamp is still on.",
+    "description": "Rain reflects off the wired glass.\nA thick envelope is waiting in the pickup tray.\nFor weeks the request was a number. Now it has weight.",
+    "hint": "Look in the tray beneath the glass.",
+    "note": {
+      "title": "Ready for pickup",
+      "body": "The receiver behind the counter reads 107.1.\n\nThe cover letter lists three enclosures. Open the envelope flat so the loose index sheet doesn’t slide behind the tray."
+    },
+    "signal": {
+      "title": "Received",
+      "body": "The reply fits in a single envelope. The next question is pencilled on the back of the one you sent. Take them both home."
+    },
+    "enabled": true,
+    "seedOnUpgrade": true,
+    "image": "api/art/release-envelope",
+    "hotspots": [
+      {
+        "x": 80,
+        "y": 77,
+        "label": "The release package",
+        "type": "fragment",
+        "fragment": "release-envelope-note"
+      },
+      {
+        "x": 51,
+        "y": 40,
+        "label": "A signal behind the counter",
+        "type": "radio"
+      },
+      {
+        "x": 72,
+        "y": 56,
+        "label": "The request terminal",
+        "type": "terminal"
+      }
+    ]
   }
 ];

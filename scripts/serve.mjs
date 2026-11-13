@@ -10,7 +10,7 @@ const journal=JSON.parse(await readFile('drizzle/meta/_journal.json','utf8'));
 for(const entry of journal.entries){if(!DB.raw.prepare('SELECT name FROM local_migrations WHERE name=?').get(entry.tag)){DB.raw.exec('BEGIN');try{DB.raw.exec(await readFile('drizzle/'+entry.tag+'.sql','utf8'));DB.raw.prepare('INSERT INTO local_migrations(name) VALUES (?)').run(entry.tag);DB.raw.exec('COMMIT');}catch(e){DB.raw.exec('ROLLBACK');throw e;}}}
 const port=Number(process.env.PORT||4173),host=process.env.HOST||'127.0.0.1';
 const args=process.argv.slice(2);const portArg=args.indexOf('--port');const listenPort=portArg>=0?Number(args[portArg+1]):port;
-const env={DB,BUCKET:localBucket('private/uploads'),ART_KEY:process.env.ART_KEY,IDENTITY_MODE:process.env.IDENTITY_MODE||'anonymous',ADMIN_TOKEN:process.env.ADMIN_TOKEN,ADMIN_USER_IDS:process.env.ADMIN_USER_IDS};
+const env={DB,BUCKET:localBucket('private/uploads'),ART_KEY:process.env.ART_KEY,ARCHIVE_ART_KEY:process.env.ARCHIVE_ART_KEY,IDENTITY_MODE:process.env.IDENTITY_MODE||'anonymous',ADMIN_TOKEN:process.env.ADMIN_TOKEN,ADMIN_USER_IDS:process.env.ADMIN_USER_IDS};
 http.createServer(async(req,res)=>{try{
  const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>900000){res.writeHead(413);res.end();return;}chunks.push(chunk);}
  const body=chunks.length?Buffer.concat(chunks):undefined;

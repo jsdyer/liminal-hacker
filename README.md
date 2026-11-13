@@ -1,6 +1,6 @@
 # Liminal Hacker
 
-**Hacking the in-between, after hours.** Nineteen imagined late-night places, an encrypted unlisted room, and a little warmth inside very large empty spaces.
+**Hacking the in-between, after hours.** Twenty-seven imagined late-night places, an encrypted unlisted room, and a little warmth inside very large empty spaces.
 
 The first arrival is random. Refreshing brings you back to it. A compact horizontal carousel remembers places you have reached; new places remain unnamed and unpictured until a passage opens. Each discovery is selected without replacement. There is no score, streak, daily reset, missed reward, or need to keep the page open.
 
@@ -26,7 +26,7 @@ Write your own posts at `/admin#journal`, manage your photo library at `/admin#p
 | Server-owned discovery and authorization | `worker/service.js` |
 | Artwork encryption | `worker/art.js`, `scripts/art.mjs` |
 
-Once a draft is first saved in the desk, database settings take precedence over these seed files. Use the desk for day-to-day changes.
+Once a draft is first saved in the desk, database settings take precedence over these seed files. The eight archive locations are added by ID to older catalogues. Use the desk for day-to-day changes.
 
 See [customization](docs/CUSTOMIZING.md), [discovery design](docs/DISCOVERY.md), and [self-hosting](docs/SELF-HOSTING.md).
 
@@ -34,14 +34,16 @@ See [customization](docs/CUSTOMIZING.md), [discovery design](docs/DISCOVERY.md),
 
 The atrium, rooftop relay, warm machine, midnight wash, last platform, still-water room, closed concourse, overnight stacks, vacancy corridor, ferry crossing, borrowed sky, empty lanes, lower level, hill station, open lab, last screening, suspended passage, roadside light, and sleeping records.
 
-Every location has original artwork, a palette, optional synthesized ambience, a physical note, and a radio transmission. There are 39 ordinary fragments and a separate encrypted bonus room. The local fictional terminal offers `help`, `ls`, `cat note.txt`, `scan`, `tune`, `walk`, `map`, `notebook`, `tea`, and small discoveries. It executes no real commands and makes no real network scans.
+The access-to-information locations include the basement archive, closed stacks, redaction desk, microfilm alcove, reading room, museum storage, last gallery, and release counter.
+
+Every location has original artwork, a palette, optional synthesized ambience, a physical note, and a radio transmission. There are 55 ordinary fragments and a separate encrypted bonus room. The local fictional terminal offers `help`, `ls`, `cat note.txt`, `scan`, `tune`, `walk`, `map`, `notebook`, `tea`, and small discoveries. It executes no real commands and makes no real network scans.
 
 ## Server and build
 
 The browser remains plain HTML/CSS/JavaScript. The pacing feature now needs a backend; a static upload alone cannot enforce it. No npm dependencies are required. Node 24+ provides the local runtime and SQLite adapter. Production on Sites uses a Worker, D1 and private R2 artwork storage, with identity supplied by the hosting service.
 
 ```sh
-# Configure .env using .env.example, including the existing artwork key.
+# Configure .env using .env.example, including both artwork keys.
 npm run check
 npm test
 npm run build

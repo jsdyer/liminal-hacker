@@ -34,3 +34,10 @@ html[data-scene=rooftop]{--accent:#b9bbdf;--line:rgba(190,193,223,.2);--surface:
 .night-transmission{font:11px/1.6 var(--mono);color:var(--accent);border-left:1px solid var(--accent);padding-left:12px;max-width:440px;margin:0 0 20px}.night-transmission[hidden],#night-desk[hidden]{display:none}
 .personal-journal{position:relative;display:grid;grid-template-columns:1fr 1.35fr;gap:70px;padding:65px 7%;border-top:1px solid #b4d4bf25;background:#0b1215ee}.personal-journal h2{font:44px/1.15 Georgia,serif;font-weight:400;margin:18px 0}.personal-journal h2 em{color:var(--accent,#b4d4bf)}.personal-journal>div>p{color:#9aada8;font-size:13px;max-width:330px;line-height:1.8}.personal-journal .text-button{display:inline-block;margin-top:16px}.home-entry{display:flex;gap:23px;padding:21px 0;border-bottom:1px solid #b4d4bf25;text-decoration:none;color:inherit}.home-entry img{width:105px;height:95px;object-fit:cover}.home-entry h3{font:22px Georgia,serif;margin:8px 0}.home-entry .mono{font-size:9px;color:#9aada8}.home-entry p{font-size:12px;color:#9aada8;line-height:1.7;margin:0}.journal-quiet{font:italic 25px/1.6 Georgia,serif!important;margin:45px 0}
 @media(max-width:700px){.personal-journal{grid-template-columns:1fr;gap:20px;padding:40px 6%}.personal-journal h2{font-size:36px}.site-header nav{gap:10px}.site-header nav a{font-size:10px}}
+
+/* The archive photographs put their lit subjects near the right edge. */
+@media (max-width: 700px) {
+  html:is([data-scene=basement-archive], [data-scene=closed-stacks], [data-scene=redaction-desk], [data-scene=microfilm], [data-scene=archive-reading-room], [data-scene=museum-storage], [data-scene=last-gallery], [data-scene=release-envelope]) .scene-image {
+    background-position: 88% center;
+  }
+}
